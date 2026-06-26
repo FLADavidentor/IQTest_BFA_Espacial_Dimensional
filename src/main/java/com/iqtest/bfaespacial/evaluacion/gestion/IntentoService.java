@@ -1,5 +1,6 @@
 package com.iqtest.bfaespacial.evaluacion.gestion;
 
+import com.iqtest.bfaespacial.administracion.auditoria.AuditoriaService;
 import com.iqtest.bfaespacial.administracion.catalogo.VersionFormularioRepository;
 import com.iqtest.bfaespacial.common.IntentoConflictException;
 import com.iqtest.bfaespacial.domain.Intento;
@@ -13,10 +14,13 @@ public class IntentoService {
 
     private final IntentoRepository intentoRepo;
     private final VersionFormularioRepository versionRepo;
+    private final AuditoriaService auditoria;
 
-    public IntentoService(IntentoRepository intentoRepo, VersionFormularioRepository versionRepo) {
+    public IntentoService(IntentoRepository intentoRepo, VersionFormularioRepository versionRepo,
+                          AuditoriaService auditoria) {
         this.intentoRepo = intentoRepo;
         this.versionRepo = versionRepo;
+        this.auditoria = auditoria;
     }
 
     /**
@@ -26,6 +30,12 @@ public class IntentoService {
     @Transactional
     public Intento iniciarOReanudar(String cif, String periodo) {
         return intentoRepo.findByCifAndPeriodoAcademico(cif, periodo)
+                .map(existing -> {
+                    if (existing.getEstado() == EstadoIntento.ACTIVO) {
+                        auditoria.registrar(existing.getId(), cif, "INTENTO_REANUDADO", null);
+                    }
+                    return existing;
+                })
                 .orElseGet(() -> crear(cif, periodo));
     }
 
@@ -43,6 +53,8 @@ public class IntentoService {
         intento.setPeriodoAcademico(periodo);
         intento.setVersionFormulario(version);
         intento.setEstado(EstadoIntento.ACTIVO);
-        return intentoRepo.save(intento);
+        intento = intentoRepo.save(intento);
+        auditoria.registrar(intento.getId(), cif, "INTENTO_CREADO", "version=" + version.getId());
+        return intento;
     }
 }

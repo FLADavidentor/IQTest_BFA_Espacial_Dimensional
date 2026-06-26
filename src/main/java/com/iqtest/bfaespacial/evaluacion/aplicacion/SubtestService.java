@@ -29,15 +29,18 @@ public class SubtestService {
     private final RespuestaRepository respuestaRepo;
     private final ConfiguracionSubtestRepository configRepo;
     private final ApplicationEventPublisher events;
+    private final com.iqtest.bfaespacial.administracion.auditoria.AuditoriaService auditoria;
     private final EntityManager em;
 
     public SubtestService(EjecucionSubtestRepository ejecucionRepo, RespuestaRepository respuestaRepo,
-                          ConfiguracionSubtestRepository configRepo,
-                          ApplicationEventPublisher events, EntityManager em) {
+                          ConfiguracionSubtestRepository configRepo, ApplicationEventPublisher events,
+                          com.iqtest.bfaespacial.administracion.auditoria.AuditoriaService auditoria,
+                          EntityManager em) {
         this.ejecucionRepo = ejecucionRepo;
         this.respuestaRepo = respuestaRepo;
         this.configRepo = configRepo;
         this.events = events;
+        this.auditoria = auditoria;
         this.em = em;
     }
 
@@ -89,6 +92,8 @@ public class SubtestService {
         if (e.getEstado() == EstadoSubtest.PENDIENTE) {
             e.setEstado(EstadoSubtest.EN_CURSO);
             e.setFechaInicio(OffsetDateTime.now());
+            auditoria.registrar(e.getIntento().getId(), e.getIntento().getCif(),
+                    "SUBTEST_INICIADO", e.getTipoSubtest().name());
         }
         return e;
     }
@@ -127,6 +132,9 @@ public class SubtestService {
         ejec.setFechaCierre(OffsetDateTime.now());
 
         Long intentoId = ejec.getIntento().getId();
+        auditoria.registrar(intentoId, ejec.getIntento().getCif(),
+                porTiempo ? "SUBTEST_CERRADO_POR_TIEMPO" : "SUBTEST_CERRADO_MANUAL",
+                ejec.getTipoSubtest().name());
         if (ejec.getTipoSubtest() == ULTIMO_SUBTEST) {
             events.publishEvent(new IntentoListoParaCalificarEvent(intentoId));
         } else {

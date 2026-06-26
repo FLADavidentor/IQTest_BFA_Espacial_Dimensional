@@ -1,5 +1,7 @@
 package com.iqtest.bfaespacial.evaluacion.sincronizacion;
 
+import com.iqtest.bfaespacial.administracion.auditoria.AuditoriaService;
+import com.iqtest.bfaespacial.domain.EjecucionSubtest;
 import com.iqtest.bfaespacial.domain.enums.EstadoSubtest;
 import com.iqtest.bfaespacial.evaluacion.aplicacion.EjecucionSubtestRepository;
 import com.iqtest.bfaespacial.evaluacion.aplicacion.SubtestService;
@@ -21,24 +23,27 @@ public class SincronizacionService {
 
     private final SubtestService subtestService;
     private final EjecucionSubtestRepository ejecucionRepo;
+    private final AuditoriaService auditoria;
 
-    public SincronizacionService(SubtestService subtestService, EjecucionSubtestRepository ejecucionRepo) {
+    public SincronizacionService(SubtestService subtestService, EjecucionSubtestRepository ejecucionRepo,
+                                 AuditoriaService auditoria) {
         this.subtestService = subtestService;
         this.ejecucionRepo = ejecucionRepo;
+        this.auditoria = auditoria;
     }
 
     @Transactional
     public Resultado sincronizar(Long ejecucionId, List<RespuestaPendiente> pendientes) {
+        EjecucionSubtest ejec = ejecucionRepo.findById(ejecucionId).orElse(null);
         // Single state check: the subtest already closed (e.g. timer expired) => reject the whole batch.
-        boolean enCurso = ejecucionRepo.findById(ejecucionId)
-                .map(e -> e.getEstado() == EstadoSubtest.EN_CURSO)
-                .orElse(false);
-        if (!enCurso) {
+        if (ejec == null || ejec.getEstado() != EstadoSubtest.EN_CURSO) {
             return new Resultado(0, pendientes.size());
         }
         for (RespuestaPendiente p : pendientes) {
             subtestService.registrarRespuesta(ejecucionId, p.reactivoId(), p.opcionReactivoId());
         }
+        auditoria.registrar(ejec.getIntento().getId(), ejec.getIntento().getCif(),
+                "SYNC_RECIBIDA", pendientes.size() + " respuestas");
         return new Resultado(pendientes.size(), 0);
     }
 }

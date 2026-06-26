@@ -82,7 +82,7 @@ public class CalificacionService {
         intento.setEstado(EstadoIntento.COMPLETADO);
         intento.setFechaFin(OffsetDateTime.now());
 
-        auditoria.registrar(intentoId, intento.getCif(), "INTENTO_CALIFICADO",
+        auditoria.registrar(intentoId, intento.getCif(), "RESULTADO_CALCULADO",
                 "pd_s1a=%d pd_s1b=%d pd_s2=%d perc_st=%d".formatted(pdS1a, pdS1b, pdS2, pSt.percentil()));
         return saved;
     }
