@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /** UC7: service-to-service results endpoint consumed by the IQTest Dashboard (§9). */
 @RestController
 @RequestMapping("/api/integracion")
@@ -18,17 +21,20 @@ public class ResultadosDashboardController {
     private final IntentoRepository intentoRepo;
     private final ResultadoRepository resultadoRepo;
     private final String serviceToken;
+    private final boolean snake; // §19 Q4 — key format configurable, default snake_case
 
     public ResultadosDashboardController(IntentoRepository intentoRepo, ResultadoRepository resultadoRepo,
-                                         @Value("${app.integracion.token}") String serviceToken) {
+                                         @Value("${app.integracion.token}") String serviceToken,
+                                         @Value("${app.integracion.json-format:SNAKE}") String jsonFormat) {
         this.intentoRepo = intentoRepo;
         this.resultadoRepo = resultadoRepo;
         this.serviceToken = serviceToken;
+        this.snake = !"CAMEL".equalsIgnoreCase(jsonFormat);
     }
 
     @GetMapping("/resultados/{cif}/{periodo}")
-    public ResultadoIntegracionDTO resultados(@PathVariable String cif, @PathVariable String periodo,
-                                              @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
+    public Map<String, Object> resultados(@PathVariable String cif, @PathVariable String periodo,
+                                          @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
         // STUB — Phase 6: real Dashboard token mechanism (§19 Q4). For now a static Bearer.
         if (auth == null || !auth.equals("Bearer " + serviceToken)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token inválido");
@@ -38,8 +44,16 @@ public class ResultadosDashboardController {
         Resultado r = resultadoRepo.findById(intento.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resultado no disponible"));
 
-        return new ResultadoIntegracionDTO(cif, periodo,
-                r.getPdS1(), r.getPdS2(), r.getPdSt(),
-                r.getPercS1(), r.getPercS2(), r.getPercSt(), r.getFechaCalculo());
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("cif", cif);
+        m.put("periodo", periodo);
+        m.put(snake ? "pd_s1" : "pdS1", r.getPdS1());
+        m.put(snake ? "pd_s2" : "pdS2", r.getPdS2());
+        m.put(snake ? "pd_st" : "pdSt", r.getPdSt());
+        m.put(snake ? "perc_s1" : "percS1", r.getPercS1());
+        m.put(snake ? "perc_s2" : "percS2", r.getPercS2());
+        m.put(snake ? "perc_st" : "percSt", r.getPercSt());
+        m.put(snake ? "fecha_calculo" : "fechaCalculo", r.getFechaCalculo());
+        return m;
     }
 }

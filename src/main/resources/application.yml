@@ -14,6 +14,10 @@ spring:
     problemdetails:
       enabled: true   # RFC7807 JSON errors for REST, no stack traces
 
+app:
+  integracion:
+    json-format: SNAKE   # CAMEL | SNAKE — Dashboard payload key style (§19 Q4); default snake_case
+
 management:
   endpoints:
     web:
