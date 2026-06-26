@@ -10,10 +10,6 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-  mvc:
-    problemdetails:
-      enabled: true   # RFC7807 JSON errors for REST, no stack traces
-
 app:
   integracion:
     json-format: SNAKE   # CAMEL | SNAKE — Dashboard payload key style (§19 Q4); default snake_case
