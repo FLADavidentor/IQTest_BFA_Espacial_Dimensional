@@ -21,8 +21,10 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/login", "/css/**", "/js/**", "/react/**", "/img/**")
+                        .requestMatchers("/login", "/css/**", "/js/**", "/react/**", "/img/**", "/error")
                             .permitAll()
+                        // Actuator is NOT public (7-B) — ADMIN only, in every profile.
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
                         // service-to-service: token validated in the controller (§9, §19 Q4)
                         .requestMatchers("/api/integracion/**").permitAll()
                         .requestMatchers("/evaluacion/**", "/api/subtest/**", "/api/respuesta/**")
