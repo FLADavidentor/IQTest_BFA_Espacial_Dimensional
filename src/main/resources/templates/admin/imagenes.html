@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin · Subir imagen</title>
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
+</head>
+<body>
+  <h1>Subir imagen de reactivo</h1>
+  <p>PNG, JPEG o WEBP · máx 2MB. Copia la URL resultante en el campo "Imagen URL" del reactivo.</p>
+
+  <form id="form-upload">
+    <label>Subtest:
+      <select name="tipoSubtest">
+        <option value="">(ninguno)</option>
+        <option th:each="s : ${subdirs}" th:value="${s}" th:text="${s}">s1a</option>
+      </select>
+    </label>
+    <label>Archivo: <input type="file" name="file" accept="image/png,image/jpeg,image/webp" required></label>
+    <button type="submit">Subir</button>
+  </form>
+
+  <p id="resultado"></p>
+
+  <script>
+    const form = document.getElementById('form-upload');
+    const out = document.getElementById('resultado');
+    const token = document.querySelector('meta[name="_csrf"]').content;
+    const header = document.querySelector('meta[name="_csrf_header"]').content;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      out.textContent = 'Subiendo…';
+      const data = new FormData(form);
+      try {
+        const res = await fetch('/admin/imagenes/upload', {
+          method: 'POST',
+          headers: { [header]: token },   // CSRF via header (safe for multipart)
+          body: data,
+          credentials: 'same-origin',
+        });
+        const json = await res.json();
+        if (res.ok) {
+          out.innerHTML = 'URL: <code>' + json.url + '</code> &nbsp; '
+            + '<img src="' + json.url + '" alt="preview" style="max-height:80px;vertical-align:middle">';
+        } else {
+          out.textContent = 'Error: ' + (json.error || res.status);
+        }
+      } catch (err) {
+        out.textContent = 'Error de red';
+      }
+    });
+  </script>
+</body>
+</html>

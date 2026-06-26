@@ -3,6 +3,7 @@ package com.iqtest.bfaespacial.web.admin;
 import com.iqtest.bfaespacial.web.config.WebMvcConfig;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,7 +20,7 @@ import java.util.Set;
  * §19 Q3 image upload (ROLE_ADMIN). Saves to app.imagenes.upload-dir; returns the /img/... URL
  * the admin pastes into reactivo.enunciado_imagen_url. Validates type + size; no path traversal.
  */
-@RestController
+@Controller
 @RequestMapping("/admin/imagenes")
 public class ImagenAdminController {
 
@@ -33,7 +34,15 @@ public class ImagenAdminController {
         this.uploadDir = webMvcConfig.getUploadDir();
     }
 
+    /** Upload form page. */
+    @GetMapping
+    public String pagina(org.springframework.ui.Model model) {
+        model.addAttribute("subdirs", SUBDIRS);
+        return "admin/imagenes";
+    }
+
     @PostMapping("/upload")
+    @ResponseBody
     public ResponseEntity<Map<String, Object>> upload(@RequestParam("file") MultipartFile file,
                                                       @RequestParam(value = "tipoSubtest", required = false) String tipoSubtest) {
         if (file == null || file.isEmpty()) return bad("Archivo vacío");

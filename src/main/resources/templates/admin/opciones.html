@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Admin · Opciones</title></head>
+<body>
+  <h1>Opciones del reactivo
+     <span th:text="${reactivo.tipoSubtest} + ' #' + ${reactivo.id} + ' (orden ' + ${reactivo.orden} + ')'">—</span>
+  </h1>
+  <p><a th:href="@{/admin/reactivos}">&larr; Reactivos</a></p>
+  <p th:if="${error}" th:text="${error}" style="color:red">error</p>
+
+  <table border="1">
+    <tr><th>Etiqueta</th><th>¿Correcta?</th><th></th></tr>
+    <tr th:each="o : ${opciones}">
+      <td th:text="${o.etiqueta}">—</td>
+      <td th:text="${o.esCorrecta} ? 'Sí' : 'No'">—</td>
+      <td>
+        <form th:action="@{|/admin/reactivos/${reactivo.id}/opciones/${o.id}/correcta|}" method="post" style="display:inline">
+          <button type="submit" th:disabled="${o.esCorrecta}">Marcar correcta</button>
+        </form>
+        <form th:action="@{|/admin/reactivos/${reactivo.id}/opciones/${o.id}/eliminar|}" method="post" style="display:inline">
+          <button type="submit">Eliminar</button>
+        </form>
+      </td>
+    </tr>
+  </table>
+
+  <h2>Agregar opción</h2>
+  <form th:action="@{|/admin/reactivos/${reactivo.id}/opciones|}" method="post">
+    <label>Etiqueta:
+      <select name="etiqueta">
+        <option th:each="e : ${etiquetas}" th:value="${e}" th:text="${e}">A</option>
+      </select>
+    </label>
+    <label>Correcta: <input type="checkbox" name="correcta" value="true"></label>
+    <button type="submit">Agregar</button>
+  </form>
+</body>
+</html>
