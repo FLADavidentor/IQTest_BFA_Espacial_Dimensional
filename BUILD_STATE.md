@@ -30,13 +30,20 @@ BAREMO: REAL DATA LOADED (V6 from Normas Nac del BFA.10.xlsx) — 119 rows (S1=2
 - P2-B JSON format: app.integracion.json-format CAMEL|SNAKE (default SNAKE). Snake+Camel ITs.
 - Tests: 18 java + 3 vitest, all green.
 
+## Admin UI completion (post-Phase-7)
+- Answer-option admin UI: OpcionReactivoService + /admin/reactivos/{id}/opciones (add/delete/mark-correct, single-correct-per-reactivo enforced). Items are now fully answerable via UI (no SQL). OpcionAdminIT + live.
+- Image upload page: GET /admin/imagenes (file picker + JS fetch w/ CSRF header) -> existing /upload endpoint. ImagenAdminController is @Controller + @ResponseBody.
+- KNOWN GAP: offline sync (RN-BFA-09) IS wired client-side (postRespuesta fail -> sessionStorage buffer -> window 'online' -> /api/respuesta/sync), but: retry triggers only on the 'online' event (no timed/back-off retry), flushBuffer errors are swallowed, and the CLIENT buffer/flush path has NO automated test (server /sync side is tested).
+- Current suite total: 28 java + 5 vitest, all green.
+
 ## Notes (current)
-- Flyway: V1 schema, V2 config seed, V3 reactivo.enunciado_texto, V4 reactivo.activo, V5 ejecucion fecha_inicio nullable. Real baremo data -> later migration when Excel arrives.
+- Flyway: V1 schema, V2 config seed, V3 reactivo.enunciado_texto, V4 reactivo.activo, V5 ejecucion fecha_inicio nullable, V6 real baremo data (119 rows from Normas Nac del BFA.10.xlsx).
 - Timer: @Scheduled default 1000ms (app.timer.fixed-delay-ms); SSE pushes closure (<1s latency, RN-BFA-04 met).
 - CSRF intentionally disabled for /api/** (session-cookie SPA, same-origin); CSRF on for Thymeleaf forms.
 - Testcontainers needs api.version=1.44 (Docker 29) via surefire systemPropertyVariables. Tests: ./mvnw test (surefire includes *IT); one shared PG container (AbstractPostgresIT). Frontend: vitest gated in mvn build.
 - No users table in §5 — admin roles via SecurityConfig in-memory (dev) // STUB Phase 6.
-- Do NOT start Phase 6 (real auth/images/baremo import) until client provides: (1) IQTest session contract, (2) authorized images from Coordinación de Psicología, (3) confirmed official Normas_Nac_del_BFA_10.xlsx.
+- Baremo: REAL DATA ALREADY LOADED (V6). Pending from client = only confirmation that Normas Nac del BFA.10.xlsx is the official source; no code work.
+- Do NOT start Phase 6 (real auth + authorized real images) until client provides: (1) IQTest session contract, (2) authorized images from Coordinación de Psicología.
 
 ## Open-question defaults applied (§19)
 1. Baremo gap -> next lower non-null percentile (PercentilService.GAP_STRATEGY)
