@@ -1,5 +1,5 @@
-CURRENT_PHASE: 3 — Scoring Subsystem
-LAST_COMPLETED_GATE: Phase 2 — IntentoServiceIT (conflict) + SubtestServiceIT (answer-after-close) + TimerServiceIT (expiry close) green (5/5 suite)
+CURRENT_PHASE: 4 — Web Layer (Thymeleaf + REST API)
+LAST_COMPLETED_GATE: Phase 3 — CalificacionIT green: counts + GENERATED pd_s1/pd_st + exact percentiles + ST gap fallback (audited). 6/6 suite
 NOTES:
   - Flyway: V1 schema + V2 config seed only. V3 baremo -> deferred to V5 (real Excel). V4 admin -> N/A (no users table in §5; admins via SecurityConfig Phase 4).
   - Testcontainers needs api.version=1.44 (Docker 29 min API) -> set in surefire systemPropertyVariables. Tests run via ./mvnw test (surefire includes *IT).
