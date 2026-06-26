@@ -57,7 +57,7 @@ public class SubtestApiController {
                 .findByVersionFormularioIdAndTipoSubtestOrderByOrden(
                         intento.getVersionFormulario().getId(), e.getTipoSubtest())
                 .stream()
-                .map(r -> new Item(r.getId(), r.getOrden(), r.getEnunciadoImagenUrl(),
+                .map(r -> new Item(r.getId(), r.getOrden(), r.getEnunciadoImagenUrl(), r.getEnunciadoTexto(),
                         opcionRepo.findByReactivoIdOrderByEtiqueta(r.getId()).stream()
                                 // RN-BFA-08: expose only id + etiqueta, never es_correcta
                                 .map(o -> new Opcion(o.getId(), o.getEtiqueta()))

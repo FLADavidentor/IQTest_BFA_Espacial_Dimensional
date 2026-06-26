@@ -31,4 +31,8 @@ public class Reactivo {
 
     @Column(name = "enunciado_imagen_url", nullable = false, columnDefinition = "text")
     private String enunciadoImagenUrl;
+
+    // Optional text fallback (P0-A) shown when the image is unavailable.
+    @Column(name = "enunciado_texto", columnDefinition = "text")
+    private String enunciadoTexto;
 }

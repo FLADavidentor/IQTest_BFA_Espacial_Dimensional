@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   base: '/react/',
+  test: { environment: 'jsdom', globals: true },
   build: {
     outDir: '../src/main/resources/static/react',
     emptyOutDir: true,

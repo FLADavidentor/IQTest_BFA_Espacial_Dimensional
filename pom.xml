@@ -140,6 +140,17 @@
             </configuration>
           </execution>
           <execution>
+            <id>npm-test</id>
+            <phase>generate-resources</phase>
+            <goals><goal>exec</goal></goals>
+            <configuration>
+              <executable>npm</executable>
+              <workingDirectory>${project.basedir}/frontend</workingDirectory>
+              <arguments><argument>test</argument></arguments>
+              <skip>${skipFrontend}</skip>
+            </configuration>
+          </execution>
+          <execution>
             <id>npm-build</id>
             <phase>generate-resources</phase>
             <goals><goal>exec</goal></goals>

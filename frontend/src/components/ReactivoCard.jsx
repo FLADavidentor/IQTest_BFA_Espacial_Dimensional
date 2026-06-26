@@ -1,11 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-// One item: image + options (A/B or A–E). No correct-answer data exists client-side.
+// One item: image (with graceful fallback) + options. No correct-answer data exists client-side.
 export default function ReactivoCard({ item, selected, onSelect }) {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <fieldset className="bfa-reactivo">
       <legend>Ítem {item.orden}</legend>
-      <img src={item.imagenUrl} alt={`Ítem ${item.orden}`} loading="lazy" />
+
+      {!imgError && item.imagenUrl ? (
+        <img
+          src={item.imagenUrl}
+          alt={`Ítem ${item.orden}`}
+          loading="lazy"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <div className="bfa-img-fallback" role="img"
+             aria-label={`Ítem ${item.orden}: imagen no disponible`}>
+          [ Imagen no disponible — Ítem {item.orden} ]
+        </div>
+      )}
+
+      {item.enunciadoTexto && <p className="bfa-enunciado">{item.enunciadoTexto}</p>}
+
       <div className="bfa-opciones">
         {item.opciones.map((o) => (
           <label key={o.id}>
