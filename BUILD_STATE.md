@@ -1,5 +1,6 @@
-CURRENT_PHASE: 5 — React SPA
-LAST_COMPLETED_GATE: Phase 4 — WebSecurityIT 3/3 (anon->login, ESTUDIANTE->/resultados 403, /api/subtest/current sin es_correcta). 9/9 suite. Manual security pass: fixed IDOR on POST /api/respuesta.
+CURRENT_PHASE: 6 — Integration & Real Auth
+LAST_COMPLETED_GATE: Phase 5 — React SPA built + bundled (/react/assets/bfa-subtest.js served by jar). SubtestFlujoIT: login->current->answer->expiry->CERRADO_POR_TIEMPO. 10/10 suite. No es_correcta in API.
+NOTE Phase 5: browser walkthrough not run (headless env); verified server-side via SubtestFlujoIT + static asset serving. Vite emits fixed filenames; mvnw clean needed to drop stale chunks from target.
 PHASE_4_REMAINING (carry into Phase 4 polish / before deploy):
   - Admin write-CRUD forms (create/edit/delete reactivo/version/baremo) — only list views built; routes role-gated. Gate did not require writes.
   - CSRF disabled for /api/** (session SPA) — revisit Phase 7.

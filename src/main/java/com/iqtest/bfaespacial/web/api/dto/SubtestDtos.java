@@ -9,7 +9,8 @@ public final class SubtestDtos {
 
     public record Item(Long id, short orden, String imagenUrl, List<Opcion> opciones) {}
 
-    public record SubtestActual(String subtestType, List<Item> items, long tiempoRestanteSeg, String estado) {}
+    public record SubtestActual(Long ejecucionSubtestId, String subtestType, List<Item> items,
+                                long tiempoRestanteSeg, String estado) {}
 
     public record Tiempo(long tiempoRestanteSeg, String subtestType, String estado) {}
 

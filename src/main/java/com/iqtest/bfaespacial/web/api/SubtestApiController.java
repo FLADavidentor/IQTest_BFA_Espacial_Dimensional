@@ -64,16 +64,18 @@ public class SubtestApiController {
                                 .toList()))
                 .toList();
 
-        return new SubtestActual(e.getTipoSubtest().name(), items, va.tiempoRestanteSeg(), e.getEstado().name());
+        return new SubtestActual(e.getId(), e.getTipoSubtest().name(), items,
+                va.tiempoRestanteSeg(), e.getEstado().name());
     }
 
     @GetMapping("/subtest/tiempo-restante")
     public Tiempo tiempoRestante() {
         Intento intento = intentoActual();
-        VistaActual va = subtestService.vistaActual(intento.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sin subtest en curso"));
-        return new Tiempo(va.tiempoRestanteSeg(), va.ejecucion().getTipoSubtest().name(),
-                va.ejecucion().getEstado().name());
+        EjecucionSubtest e = ejecucionRepo.findFirstByIntentoIdOrderByFechaInicioDesc(intento.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sin subtest"));
+        long restante = e.getEstado() == com.iqtest.bfaespacial.domain.enums.EstadoSubtest.EN_CURSO
+                ? subtestService.tiempoRestanteSeg(e) : 0;
+        return new Tiempo(restante, e.getTipoSubtest().name(), e.getEstado().name());
     }
 
     @PostMapping("/respuesta")
