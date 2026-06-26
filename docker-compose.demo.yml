@@ -1,0 +1,35 @@
+# Self-contained demo: PostgreSQL + the app image, seeded and ready after `up`.
+# Run with:  ./demo.sh   (or: docker compose -f docker-compose.demo.yml up --build)
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: bfa
+      POSTGRES_USER: bfa
+      POSTGRES_PASSWORD: bfa
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bfa -d bfa"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: "dev,demo"          # dev behavior + demo seed
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/bfa"
+      SPRING_DATASOURCE_USERNAME: "bfa"
+      SPRING_DATASOURCE_PASSWORD: "bfa"
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/login > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s

@@ -1,0 +1,5 @@
+# 'demo' profile (layered on 'dev') — adds the demo seed location so V99__demo_seed.sql runs.
+# Kept separate from 'dev' so the test suite (which runs under 'dev') never applies the seed.
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/demo

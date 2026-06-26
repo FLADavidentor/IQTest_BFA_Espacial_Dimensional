@@ -1,0 +1,11 @@
+.git
+target
+frontend/node_modules
+frontend/dist
+src/main/resources/static/react
+*.log
+*.xlsx
+*.pdf
+*:Zone.Identifier
+.idea
+.vscode
