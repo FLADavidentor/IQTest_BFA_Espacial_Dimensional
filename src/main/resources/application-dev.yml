@@ -7,8 +7,10 @@ spring:
 # Stubbed integration values — real impl Phase 6
 app:
   periodo-academico-actual: "2026-I"
+  imagenes:
+    base-url: "http://localhost:8080/img"   # §19 Q3
   iqtest:
     session-attr: cif          # §19 Q2 default: read CIF from HttpSession attribute
     dev-cif: "DEV0000001"      # STUB — Phase 6 (hardcoded CIF in dev)
   integracion:
-    token: "dev-service-token" # STUB — Phase 6 (Dashboard Bearer token)
+    api-key: "dev-service-token" # §19 Q4 — Dashboard Bearer API key (STUB token until Phase 6)

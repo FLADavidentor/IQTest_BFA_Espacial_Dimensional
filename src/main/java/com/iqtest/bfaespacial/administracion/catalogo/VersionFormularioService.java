@@ -40,9 +40,10 @@ public class VersionFormularioService {
     }
 
     /**
-     * Activate a version. Single active per year is enforced at the service level:
-     * all other versions of the same year are deactivated. If another active version
-     * exists and confirmar=false, refuse (user must confirm the deactivation).
+     * §19 Q5 RESOLVED — version selection rule: exactly one active version per year.
+     * Activating a version deactivates all other versions of the same year (enforced here,
+     * not only at the DB). If another active version exists and confirmar=false, refuse
+     * (the admin must confirm the deactivation). IntentoService picks the active version.
      */
     @Transactional
     public void activar(Long id, boolean confirmar) {

@@ -6,8 +6,10 @@ spring:
 
 app:
   periodo-academico-actual: ${PERIODO_ACTUAL}
+  imagenes:
+    base-url: ${IMAGENES_BASE_URL}
   iqtest:
     session-attr: cif
     dev-cif: ${DEV_CIF:UNUSED}
   integracion:
-    token: ${INTEGRACION_TOKEN}
+    api-key: ${INTEGRACION_API_KEY}

@@ -33,11 +33,13 @@ public class SubtestApiController {
     private final OpcionReactivoRepository opcionRepo;
     private final EjecucionSubtestRepository ejecucionRepo;
     private final TimerEventService timerEvents;
+    private final ImagenResolver imagenResolver;
 
     public SubtestApiController(SesionIQTestClient sesion, IntentoRepository intentoRepo,
                                 SubtestService subtestService, SincronizacionService sincronizacionService,
                                 ReactivoRepository reactivoRepo, OpcionReactivoRepository opcionRepo,
-                                EjecucionSubtestRepository ejecucionRepo, TimerEventService timerEvents) {
+                                EjecucionSubtestRepository ejecucionRepo, TimerEventService timerEvents,
+                                ImagenResolver imagenResolver) {
         this.sesion = sesion;
         this.intentoRepo = intentoRepo;
         this.subtestService = subtestService;
@@ -46,6 +48,7 @@ public class SubtestApiController {
         this.opcionRepo = opcionRepo;
         this.ejecucionRepo = ejecucionRepo;
         this.timerEvents = timerEvents;
+        this.imagenResolver = imagenResolver;
     }
 
     /** SSE stream: server pushes a "cerrado" event the moment the timer closes a subtest (P2-A). */
@@ -76,7 +79,8 @@ public class SubtestApiController {
                 .findByVersionFormularioIdAndTipoSubtestAndActivoTrueOrderByOrden(
                         intento.getVersionFormulario().getId(), e.getTipoSubtest())
                 .stream()
-                .map(r -> new Item(r.getId(), r.getOrden(), r.getEnunciadoImagenUrl(), r.getEnunciadoTexto(),
+                .map(r -> new Item(r.getId(), r.getOrden(), imagenResolver.resolve(r.getEnunciadoImagenUrl()),
+                        r.getEnunciadoTexto(),
                         opcionRepo.findByReactivoIdOrderByEtiqueta(r.getId()).stream()
                                 // RN-BFA-08: expose only id + etiqueta, never es_correcta
                                 .map(o -> new Opcion(o.getId(), o.getEtiqueta()))

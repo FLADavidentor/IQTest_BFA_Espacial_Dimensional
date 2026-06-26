@@ -6,12 +6,13 @@ import org.springframework.stereotype.Service;
 
 /**
  * Converts a direct score to a percentile via the baremo (§13).
- * §19 Q1 open question — conservative default below.
+ * §19 Q1 RESOLVED: on a baremo gap ("-" / missing direct score), report the percentile of the
+ * next lower available direct score (NEXT_LOWER). The fallback is audited as BAREMO_GAP.
  */
 @Service
 public class PercentilService {
 
-    /** GAP_STRATEGY: on a missing baremo entry, use the next lower available score's percentile. */
+    /** GAP_STRATEGY (§19 Q1): on a missing baremo entry, use the next lower available score's percentile. */
     public static final String GAP_STRATEGY = "NEXT_LOWER";
 
     public record PercentilResultado(short percentil, boolean fallback) {}

@@ -20,24 +20,24 @@ public class ResultadosDashboardController {
 
     private final IntentoRepository intentoRepo;
     private final ResultadoRepository resultadoRepo;
-    private final String serviceToken;
+    private final String apiKey;
     private final boolean snake; // §19 Q4 — key format configurable, default snake_case
 
     public ResultadosDashboardController(IntentoRepository intentoRepo, ResultadoRepository resultadoRepo,
-                                         @Value("${app.integracion.token}") String serviceToken,
+                                         @Value("${app.integracion.api-key}") String apiKey,
                                          @Value("${app.integracion.json-format:SNAKE}") String jsonFormat) {
         this.intentoRepo = intentoRepo;
         this.resultadoRepo = resultadoRepo;
-        this.serviceToken = serviceToken;
+        this.apiKey = apiKey;
         this.snake = !"CAMEL".equalsIgnoreCase(jsonFormat);
     }
 
     @GetMapping("/resultados/{cif}/{periodo}")
     public Map<String, Object> resultados(@PathVariable String cif, @PathVariable String periodo,
                                           @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
-        // STUB — Phase 6: real Dashboard token mechanism (§19 Q4). For now a static Bearer.
-        if (auth == null || !auth.equals("Bearer " + serviceToken)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token inválido");
+        // §19 Q4: API key as Authorization: Bearer <key>, validated against app.integracion.api-key.
+        if (auth == null || !auth.equals("Bearer " + apiKey)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "API key inválida");
         }
         Intento intento = intentoRepo.findByCifAndPeriodoAcademico(cif, periodo)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Intento no encontrado"));
