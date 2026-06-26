@@ -96,13 +96,12 @@ export default function SubtestApp() {
   }
 
   // view === 'test'
-  const answered = Object.keys(answers).length;
   return (
     <div className="bfa-subtest">
       <header>
         <h1>Subtest {data.subtestType}</h1>
         <CountdownTimer seconds={data.tiempoRestanteSeg} onExpire={expirar} />
-        <ProgressBar answered={Object.keys(answers).length} total={data.items.length} />
+        <ProgressBar answers={answers} items={data.items} />
       </header>
       {data.items.map((item) => (
         <ReactivoCard key={item.id} item={item} selected={answers[item.id]} onSelect={seleccionar} />
