@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Resultados</title></head>
+<body>
+  <h1>Resultados</h1>
+  <p>CIF <span th:text="${cif}">—</span> · Periodo <span th:text="${periodo}">—</span></p>
+  <table border="1">
+    <tr><th>Factor</th><th>Puntuación directa</th><th>Percentil</th></tr>
+    <tr><td>S1a</td><td th:text="${resultado.pdS1a}">—</td><td>—</td></tr>
+    <tr><td>S1b</td><td th:text="${resultado.pdS1b}">—</td><td>—</td></tr>
+    <tr><td>S1</td><td th:text="${resultado.pdS1}">—</td><td th:text="${resultado.percS1}">—</td></tr>
+    <tr><td>S2</td><td th:text="${resultado.pdS2}">—</td><td th:text="${resultado.percS2}">—</td></tr>
+    <tr><td>ST</td><td th:text="${resultado.pdSt}">—</td><td th:text="${resultado.percSt}">—</td></tr>
+  </table>
+  <p><a th:href="@{|/resultados/${cif}/${periodo}/respuestas|}">Revisar respuestas</a></p>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Admin · Reactivos</title></head>
+<body>
+  <h1>Reactivos</h1>
+  <table border="1">
+    <tr><th>ID</th><th>Subtest</th><th>Orden</th><th>Imagen URL</th></tr>
+    <tr th:each="r : ${reactivos}">
+      <td th:text="${r.id}">—</td>
+      <td th:text="${r.tipoSubtest}">—</td>
+      <td th:text="${r.orden}">—</td>
+      <td th:text="${r.enunciadoImagenUrl}">—</td>
+    </tr>
+  </table>
+</body>
+</html>

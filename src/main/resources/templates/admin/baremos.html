@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Admin · Baremos</title></head>
+<body>
+  <h1>Baremo</h1>
+  <table border="1">
+    <tr><th>Factor</th><th>Puntuación directa</th><th>Percentil</th></tr>
+    <tr th:each="b : ${baremos}">
+      <td th:text="${b.factor}">—</td>
+      <td th:text="${b.puntuacionDirecta}">—</td>
+      <td th:text="${b.percentil}">—</td>
+    </tr>
+  </table>
+</body>
+</html>

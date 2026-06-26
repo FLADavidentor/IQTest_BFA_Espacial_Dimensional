@@ -1,5 +1,6 @@
 package com.iqtest.bfaespacial.evaluacion.aplicacion;
 
+import com.iqtest.bfaespacial.administracion.catalogo.ConfiguracionSubtestRepository;
 import com.iqtest.bfaespacial.common.IntentoListoParaCalificarEvent;
 import com.iqtest.bfaespacial.common.SubtestCerradoException;
 import com.iqtest.bfaespacial.domain.*;
@@ -10,25 +11,53 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SubtestService {
 
-    // Last subtest in the sequence S1A -> S2 -> S1B (RN-BFA-03)
+    // Subtest order S1A -> S2 -> S1B (RN-BFA-03)
+    private static final List<TipoSubtest> SECUENCIA = List.of(TipoSubtest.S1A, TipoSubtest.S2, TipoSubtest.S1B);
     private static final TipoSubtest ULTIMO_SUBTEST = TipoSubtest.S1B;
+
+    public record VistaActual(EjecucionSubtest ejecucion, long tiempoRestanteSeg) {}
 
     private final EjecucionSubtestRepository ejecucionRepo;
     private final RespuestaRepository respuestaRepo;
+    private final ConfiguracionSubtestRepository configRepo;
     private final ApplicationEventPublisher events;
     private final EntityManager em;
 
     public SubtestService(EjecucionSubtestRepository ejecucionRepo, RespuestaRepository respuestaRepo,
+                          ConfiguracionSubtestRepository configRepo,
                           ApplicationEventPublisher events, EntityManager em) {
         this.ejecucionRepo = ejecucionRepo;
         this.respuestaRepo = respuestaRepo;
+        this.configRepo = configRepo;
         this.events = events;
         this.em = em;
+    }
+
+    /** Current EN_CURSO execution for an intento plus server-computed remaining seconds (§12). */
+    @Transactional(readOnly = true)
+    public Optional<VistaActual> vistaActual(Long intentoId) {
+        return ejecucionRepo.findFirstByIntentoIdAndEstado(intentoId, EstadoSubtest.EN_CURSO)
+                .map(e -> new VistaActual(e, tiempoRestanteSeg(e)));
+    }
+
+    public long tiempoRestanteSeg(EjecucionSubtest e) {
+        int limite = configRepo.findById(e.getTipoSubtest()).orElseThrow().getTiempoLimiteSeg();
+        long transcurrido = Duration.between(e.getFechaInicio(), OffsetDateTime.now()).getSeconds();
+        return Math.max(0, limite - transcurrido);
+    }
+
+    /** Next subtest in the sequence, or empty after the last (S1B). */
+    public Optional<TipoSubtest> siguiente(TipoSubtest actual) {
+        int i = SECUENCIA.indexOf(actual);
+        return (i >= 0 && i < SECUENCIA.size() - 1) ? Optional.of(SECUENCIA.get(i + 1)) : Optional.empty();
     }
 
     /** Start (or return existing) timed execution. Sets fecha_inicio = NOW (server clock). */

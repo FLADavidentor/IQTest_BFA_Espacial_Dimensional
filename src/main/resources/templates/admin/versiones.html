@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Admin · Versiones</title></head>
+<body>
+  <h1>Versiones de formulario</h1>
+  <table border="1">
+    <tr><th>ID</th><th>Año</th><th>N° versión</th><th>Activa</th></tr>
+    <tr th:each="v : ${versiones}">
+      <td th:text="${v.id}">—</td>
+      <td th:text="${v.anio}">—</td>
+      <td th:text="${v.numeroVersion}">—</td>
+      <td th:text="${v.activa} ? 'Sí' : 'No'">—</td>
+    </tr>
+  </table>
+</body>
+</html>

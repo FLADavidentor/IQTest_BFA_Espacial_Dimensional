@@ -6,6 +6,7 @@ spring:
 
 # Stubbed integration values — real impl Phase 6
 app:
+  periodo-academico-actual: "2026-I"
   iqtest:
     session-attr: cif          # §19 Q2 default: read CIF from HttpSession attribute
     dev-cif: "DEV0000001"      # STUB — Phase 6 (hardcoded CIF in dev)

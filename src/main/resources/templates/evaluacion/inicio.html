@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>BFA Espacial — Inicio</title></head>
+<body>
+  <h1>Evaluación BFA Espacial</h1>
+  <p>CIF: <span th:text="${intento.cif}">—</span></p>
+  <p>Periodo: <span th:text="${intento.periodoAcademico}">—</span></p>
+  <p>Estado: <span th:text="${intento.estado}">—</span></p>
+
+  <div th:if="${completado}">
+    <p>Ya completaste esta evaluación.</p>
+  </div>
+  <div th:unless="${completado}">
+    <a th:href="@{/evaluacion/subtest}">Continuar al subtest</a>
+  </div>
+</body>
+</html>

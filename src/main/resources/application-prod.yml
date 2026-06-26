@@ -5,7 +5,9 @@ spring:
     password: ${DB_PASSWORD}
 
 app:
+  periodo-academico-actual: ${PERIODO_ACTUAL}
   iqtest:
     session-attr: cif
+    dev-cif: ${DEV_CIF:UNUSED}
   integracion:
     token: ${INTEGRACION_TOKEN}

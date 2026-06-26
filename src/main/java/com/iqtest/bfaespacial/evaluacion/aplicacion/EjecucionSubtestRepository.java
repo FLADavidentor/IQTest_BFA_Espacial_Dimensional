@@ -12,6 +12,9 @@ public interface EjecucionSubtestRepository extends JpaRepository<EjecucionSubte
 
     Optional<EjecucionSubtest> findByIntentoIdAndTipoSubtest(Long intentoId, TipoSubtest tipoSubtest);
 
+    Optional<EjecucionSubtest> findFirstByIntentoIdAndEstado(
+            Long intentoId, com.iqtest.bfaespacial.domain.enums.EstadoSubtest estado);
+
     /** Server-side timer (§12): EN_CURSO executions past fecha_inicio + tiempo_limite_seg. */
     @Query(value = """
             SELECT e.id FROM ejecucion_subtest e

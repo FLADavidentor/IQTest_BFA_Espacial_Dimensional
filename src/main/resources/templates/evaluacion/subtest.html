@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Subtest</title></head>
+<body>
+  <!-- React SPA mounts here (§11). Data passed via data-* attributes. -->
+  <div id="bfa-subtest-app"
+       th:attr="data-intento-id=${intentoId},
+                data-cif=${cif},
+                data-subtest-type=${subtestType},
+                data-tiempo-restante=${tiempoRestanteSeg}">
+  </div>
+  <!-- Phase 5: include the Vite-built bundle from /react/ here. -->
+</body>
+</html>

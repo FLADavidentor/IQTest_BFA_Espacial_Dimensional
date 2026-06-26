@@ -1,5 +1,9 @@
-CURRENT_PHASE: 4 — Web Layer (Thymeleaf + REST API)
-LAST_COMPLETED_GATE: Phase 3 — CalificacionIT green: counts + GENERATED pd_s1/pd_st + exact percentiles + ST gap fallback (audited). 6/6 suite
+CURRENT_PHASE: 5 — React SPA
+LAST_COMPLETED_GATE: Phase 4 — WebSecurityIT 3/3 (anon->login, ESTUDIANTE->/resultados 403, /api/subtest/current sin es_correcta). 9/9 suite. Manual security pass: fixed IDOR on POST /api/respuesta.
+PHASE_4_REMAINING (carry into Phase 4 polish / before deploy):
+  - Admin write-CRUD forms (create/edit/delete reactivo/version/baremo) — only list views built; routes role-gated. Gate did not require writes.
+  - CSRF disabled for /api/** (session SPA) — revisit Phase 7.
+  - Integracion token uses .equals (STUB Phase 6); real mechanism §19 Q4.
 NOTES:
   - Flyway: V1 schema + V2 config seed only. V3 baremo -> deferred to V5 (real Excel). V4 admin -> N/A (no users table in §5; admins via SecurityConfig Phase 4).
   - Testcontainers needs api.version=1.44 (Docker 29 min API) -> set in surefire systemPropertyVariables. Tests run via ./mvnw test (surefire includes *IT).
