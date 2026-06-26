@@ -3,13 +3,30 @@
 <head><meta charset="UTF-8"><title>Admin · Versiones</title></head>
 <body>
   <h1>Versiones de formulario</h1>
+  <p th:if="${error}" th:text="${error}" style="color:red">error</p>
+
+  <h2>Nueva versión</h2>
+  <form th:action="@{/admin/versiones}" method="post">
+    <label>Año: <input type="number" name="anio" required></label>
+    <label>N° versión: <input type="number" name="numeroVersion" required></label>
+    <label>Activa: <input type="checkbox" name="activa" value="true"></label>
+    <button type="submit">Crear</button>
+  </form>
+
+  <h2>Listado</h2>
   <table border="1">
-    <tr><th>ID</th><th>Año</th><th>N° versión</th><th>Activa</th></tr>
+    <tr><th>ID</th><th>Año</th><th>N° versión</th><th>Activa</th><th></th></tr>
     <tr th:each="v : ${versiones}">
       <td th:text="${v.id}">—</td>
       <td th:text="${v.anio}">—</td>
       <td th:text="${v.numeroVersion}">—</td>
       <td th:text="${v.activa} ? 'Sí' : 'No'">—</td>
+      <td>
+        <form th:action="@{|/admin/versiones/${v.id}/activar|}" method="post" style="display:inline">
+          <input type="hidden" name="confirmar" value="true">
+          <button type="submit" th:disabled="${v.activa}">Activar (desactiva las demás del año)</button>
+        </form>
+      </td>
     </tr>
   </table>
 </body>

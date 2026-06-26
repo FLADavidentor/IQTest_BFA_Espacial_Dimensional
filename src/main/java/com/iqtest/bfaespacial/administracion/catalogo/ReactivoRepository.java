@@ -8,5 +8,9 @@ import java.util.List;
 
 public interface ReactivoRepository extends JpaRepository<Reactivo, Long> {
 
-    List<Reactivo> findByVersionFormularioIdAndTipoSubtestOrderByOrden(Long versionFormularioId, TipoSubtest tipoSubtest);
+    // Subtest delivery: active items only (P0-B soft-delete).
+    List<Reactivo> findByVersionFormularioIdAndTipoSubtestAndActivoTrueOrderByOrden(
+            Long versionFormularioId, TipoSubtest tipoSubtest);
+
+    List<Reactivo> findAllByOrderByIdAsc();
 }

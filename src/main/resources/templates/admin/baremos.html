@@ -4,11 +4,18 @@
 <body>
   <h1>Baremo</h1>
   <table border="1">
-    <tr><th>Factor</th><th>Puntuación directa</th><th>Percentil</th></tr>
+    <tr><th>Factor</th><th>Puntuación directa</th><th>Percentil (editar)</th></tr>
     <tr th:each="b : ${baremos}">
       <td th:text="${b.factor}">—</td>
       <td th:text="${b.puntuacionDirecta}">—</td>
-      <td th:text="${b.percentil}">—</td>
+      <td>
+        <form th:action="@{/admin/baremos}" method="post" style="display:inline">
+          <input type="hidden" name="factor" th:value="${b.factor}">
+          <input type="hidden" name="puntuacionDirecta" th:value="${b.puntuacionDirecta}">
+          <input type="number" name="percentil" th:value="${b.percentil}">
+          <button type="submit">Guardar</button>
+        </form>
+      </td>
     </tr>
   </table>
 </body>

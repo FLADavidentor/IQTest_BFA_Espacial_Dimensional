@@ -1,12 +1,14 @@
 package com.iqtest.bfaespacial.web.admin;
 
 import com.iqtest.bfaespacial.administracion.catalogo.BaremoService;
+import com.iqtest.bfaespacial.domain.enums.FactorEspacial;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 
-/** UC8-10 admin catalog (baremo). ROLE_ADMIN. Write CRUD: remaining Phase-4 slice. */
+/** UC8-10 admin catalog (baremo) — inline percentile edit. ROLE_ADMIN. */
 @Controller
+@RequestMapping("/admin/baremos")
 public class BaremoAdminController {
 
     private final BaremoService service;
@@ -15,9 +17,17 @@ public class BaremoAdminController {
         this.service = service;
     }
 
-    @GetMapping("/admin/baremos")
+    @GetMapping
     public String listar(Model model) {
         model.addAttribute("baremos", service.listar());
         return "admin/baremos";
+    }
+
+    @PostMapping
+    public String editar(@RequestParam FactorEspacial factor,
+                         @RequestParam Short puntuacionDirecta,
+                         @RequestParam Short percentil) {
+        service.actualizarPercentil(factor, puntuacionDirecta, percentil);
+        return "redirect:/admin/baremos";
     }
 }

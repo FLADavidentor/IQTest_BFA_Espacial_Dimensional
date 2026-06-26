@@ -54,7 +54,7 @@ public class SubtestApiController {
         EjecucionSubtest e = va.ejecucion();
 
         List<Item> items = reactivoRepo
-                .findByVersionFormularioIdAndTipoSubtestOrderByOrden(
+                .findByVersionFormularioIdAndTipoSubtestAndActivoTrueOrderByOrden(
                         intento.getVersionFormulario().getId(), e.getTipoSubtest())
                 .stream()
                 .map(r -> new Item(r.getId(), r.getOrden(), r.getEnunciadoImagenUrl(), r.getEnunciadoTexto(),

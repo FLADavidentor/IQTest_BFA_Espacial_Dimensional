@@ -35,4 +35,8 @@ public class Reactivo {
     // Optional text fallback (P0-A) shown when the image is unavailable.
     @Column(name = "enunciado_texto", columnDefinition = "text")
     private String enunciadoTexto;
+
+    // Soft-delete flag (P0-B). Inactive items are excluded from subtest delivery.
+    @Column(nullable = false)
+    private boolean activo = true;
 }
