@@ -34,13 +34,21 @@ export default function SubtestApp() {
     return () => window.removeEventListener('online', onOnline);
   }, [data]);
 
-  // Poll for server-side closure while taking the test (§11). SSE replaces this in P2-A.
+  // Primary closure signal (P2-A): SSE push the moment the server closes the subtest.
   useEffect(() => {
-    if (view !== 'test') return;
+    if (view !== 'test') return undefined;
+    const es = new EventSource('/api/subtest/timer-events');
+    es.addEventListener('cerrado', () => setView('agotado'));
+    return () => es.close();
+  }, [view]);
+
+  // Fallback poll (in case SSE drops). Server enforces; client never decides closure alone.
+  useEffect(() => {
+    if (view !== 'test') return undefined;
     const id = setInterval(async () => {
       try {
         const t = await getTiempoRestante();
-        if (t.estado !== 'EN_CURSO') setView('agotado'); // server closed it
+        if (t.estado !== 'EN_CURSO') setView('agotado');
       } catch { setView('agotado'); }
     }, 30000);
     return () => clearInterval(id);

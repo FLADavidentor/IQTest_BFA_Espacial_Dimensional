@@ -32,11 +32,12 @@ public class SubtestApiController {
     private final ReactivoRepository reactivoRepo;
     private final OpcionReactivoRepository opcionRepo;
     private final EjecucionSubtestRepository ejecucionRepo;
+    private final TimerEventService timerEvents;
 
     public SubtestApiController(SesionIQTestClient sesion, IntentoRepository intentoRepo,
                                 SubtestService subtestService, SincronizacionService sincronizacionService,
                                 ReactivoRepository reactivoRepo, OpcionReactivoRepository opcionRepo,
-                                EjecucionSubtestRepository ejecucionRepo) {
+                                EjecucionSubtestRepository ejecucionRepo, TimerEventService timerEvents) {
         this.sesion = sesion;
         this.intentoRepo = intentoRepo;
         this.subtestService = subtestService;
@@ -44,6 +45,13 @@ public class SubtestApiController {
         this.reactivoRepo = reactivoRepo;
         this.opcionRepo = opcionRepo;
         this.ejecucionRepo = ejecucionRepo;
+        this.timerEvents = timerEvents;
+    }
+
+    /** SSE stream: server pushes a "cerrado" event the moment the timer closes a subtest (P2-A). */
+    @GetMapping(value = "/subtest/timer-events", produces = org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE)
+    public org.springframework.web.servlet.mvc.method.annotation.SseEmitter timerEvents() {
+        return timerEvents.subscribe(intentoActual().getId());
     }
 
     @GetMapping("/subtest/current")

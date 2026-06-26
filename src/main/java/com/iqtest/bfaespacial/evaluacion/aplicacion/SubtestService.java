@@ -135,6 +135,11 @@ public class SubtestService {
         auditoria.registrar(intentoId, ejec.getIntento().getCif(),
                 porTiempo ? "SUBTEST_CERRADO_POR_TIEMPO" : "SUBTEST_CERRADO_MANUAL",
                 ejec.getTipoSubtest().name());
+        if (porTiempo) {
+            // P2-A: push "tiempo agotado" to the student via SSE (after commit).
+            events.publishEvent(new com.iqtest.bfaespacial.common.SubtestCerradoPorTiempoEvent(
+                    intentoId, ejec.getTipoSubtest().name()));
+        }
         if (ejec.getTipoSubtest() == ULTIMO_SUBTEST) {
             events.publishEvent(new IntentoListoParaCalificarEvent(intentoId));
         } else {
