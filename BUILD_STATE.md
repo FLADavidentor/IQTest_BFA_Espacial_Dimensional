@@ -1,7 +1,8 @@
 CURRENT_PHASE: P2-COMPLETE
 LAST_COMPLETED_GATE: Dashboard JSON contract
-OPEN_BLOCKERS: Real IQTest session (Phase 6), real images (client), real baremo xlsx, real item content (client)
+OPEN_BLOCKERS: Real IQTest session (Phase 6), real images (client), real item content (client)
 STUBS_ACTIVE: SesionIQTestClient (Phase 6), placeholder images, seeded test items
+BAREMO: REAL DATA LOADED (V6 from Normas Nac del BFA.10.xlsx) — 119 rows (S1=27, S2=35, ST=57). No longer a blocker.
 
 ## P0/P1/P2 remediation (all gates passed)
 - P0-A image fallback: ReactivoCard onError placeholder + enunciado_texto (V3). Vitest.

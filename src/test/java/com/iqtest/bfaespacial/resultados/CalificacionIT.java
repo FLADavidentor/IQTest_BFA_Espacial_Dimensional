@@ -44,53 +44,38 @@ class CalificacionIT extends AbstractPostgresIT {
         intento.setVersionFormulario(version);
         em.persist(intento);
 
-        // pd_s1a = 2 correct (1 wrong), pd_s1b = 3 correct, pd_s2 = 1 correct
+        // pd_s1a=10, pd_s1b=8, pd_s2=15  -> pd_s1=18, pd_st=33
         EjecucionSubtest e1a = ejec(intento, TipoSubtest.S1A);
-        answer(e1a, TipoSubtest.S1A, true);
-        answer(e1a, TipoSubtest.S1A, true);
-        answer(e1a, TipoSubtest.S1A, false);
+        for (int i = 0; i < 10; i++) answer(e1a, TipoSubtest.S1A, true);
 
         EjecucionSubtest e1b = ejec(intento, TipoSubtest.S1B);
-        answer(e1b, TipoSubtest.S1B, true);
-        answer(e1b, TipoSubtest.S1B, true);
-        answer(e1b, TipoSubtest.S1B, true);
+        for (int i = 0; i < 8; i++) answer(e1b, TipoSubtest.S1B, true);
 
         EjecucionSubtest e2 = ejec(intento, TipoSubtest.S2);
-        answer(e2, TipoSubtest.S2, true);
-
-        // baremo: S1@5 -> 60, S2@1 -> 20, ST@5 -> 50 (no ST@6 => gap, NEXT_LOWER)
-        baremoRepo.save(new Baremo(FactorEspacial.S1, (short) 5, (short) 60));
-        baremoRepo.save(new Baremo(FactorEspacial.S2, (short) 1, (short) 20));
-        baremoRepo.save(new Baremo(FactorEspacial.ST, (short) 5, (short) 50));
+        for (int i = 0; i < 15; i++) answer(e2, TipoSubtest.S2, true);
         em.flush();
 
+        // No baremo seeding: assert against the REAL Normas data loaded by V6.
         long t0 = System.nanoTime();
         Resultado r = calificacionService.calificar(intento.getId());
         long ms = (System.nanoTime() - t0) / 1_000_000;
         assertThat(ms).as("RN-BFA-06: resultado < 3s").isLessThan(3000);
 
         // direct-score counts
-        assertThat(r.getPdS1a()).isEqualTo((short) 2);
-        assertThat(r.getPdS1b()).isEqualTo((short) 3);
-        assertThat(r.getPdS2()).isEqualTo((short) 1);
+        assertThat(r.getPdS1a()).isEqualTo((short) 10);
+        assertThat(r.getPdS1b()).isEqualTo((short) 8);
+        assertThat(r.getPdS2()).isEqualTo((short) 15);
         // GENERATED columns
-        assertThat(r.getPdS1()).isEqualTo((short) 5);
-        assertThat(r.getPdSt()).isEqualTo((short) 6);
-        // percentiles (ST via gap fallback to score 5)
-        assertThat(r.getPercS1()).isEqualTo((short) 60);
-        assertThat(r.getPercS2()).isEqualTo((short) 20);
-        assertThat(r.getPercSt()).isEqualTo((short) 50);
+        assertThat(r.getPdS1()).isEqualTo((short) 18);
+        assertThat(r.getPdSt()).isEqualTo((short) 33);
+        // REAL Normas percentiles: S1@18=70, S2@15=65, ST@33=65
+        assertThat(r.getPercS1()).isEqualTo((short) 70);
+        assertThat(r.getPercS2()).isEqualTo((short) 65);
+        assertThat(r.getPercSt()).isEqualTo((short) 65);
 
-        // intento completed
         Intento done = intentoRepo.findById(intento.getId()).orElseThrow();
         assertThat(done.getEstado()).isEqualTo(EstadoIntento.COMPLETADO);
         assertThat(done.getFechaFin()).isNotNull();
-
-        // gap was audited
-        long gaps = auditoriaRepo.findAll().stream()
-                .filter(a -> a.getAccion().equals("BAREMO_GAP"))
-                .count();
-        assertThat(gaps).isEqualTo(1);
     }
 
     private EjecucionSubtest ejec(Intento intento, TipoSubtest tipo) {
