@@ -46,6 +46,9 @@ public class ResultadosController {
         return "resultados/ver";
     }
 
+    // @Transactional: open-in-view is off, so keep the session open while the
+    // view-model resolves lazy Reactivo/OpcionReactivo associations.
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     @GetMapping("/resultados/{cif}/{periodo}/respuestas")
     public String respuestas(@PathVariable String cif, @PathVariable String periodo, Model model) {
         Intento intento = intento(cif, periodo);
