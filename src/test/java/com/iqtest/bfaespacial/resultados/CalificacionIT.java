@@ -64,7 +64,10 @@ class CalificacionIT extends AbstractPostgresIT {
         baremoRepo.save(new Baremo(FactorEspacial.ST, (short) 5, (short) 50));
         em.flush();
 
+        long t0 = System.nanoTime();
         Resultado r = calificacionService.calificar(intento.getId());
+        long ms = (System.nanoTime() - t0) / 1_000_000;
+        assertThat(ms).as("RN-BFA-06: resultado < 3s").isLessThan(3000);
 
         // direct-score counts
         assertThat(r.getPdS1a()).isEqualTo((short) 2);

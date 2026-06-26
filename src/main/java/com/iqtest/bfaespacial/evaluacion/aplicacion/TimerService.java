@@ -24,7 +24,10 @@ public class TimerService {
         this.subtestService = subtestService;
     }
 
-    @Scheduled(fixedDelay = 5000)
+    // §12/Phase-7 specify a 5s poll, but RN-BFA-04 wants <=1s auto-close latency — these
+    // conflict. Interval is configurable (default 5s) so it can be lowered without a rebuild.
+    // OPEN: confirm target latency with the client (logged in BUILD_STATE).
+    @Scheduled(fixedDelayString = "${app.timer.fixed-delay-ms:5000}")
     public void cerrarExpirados() {
         List<Long> expirados = ejecucionRepo.findIdsExpirados();
         for (Long id : expirados) {

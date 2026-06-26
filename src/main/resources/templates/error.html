@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Error</title></head>
+<body>
+  <h1>Ha ocurrido un error</h1>
+  <p th:text="${status} + ' ' + ${error}">Error</p>
+  <p>Si el problema persiste, contacta al administrador del módulo.</p>
+</body>
+</html>

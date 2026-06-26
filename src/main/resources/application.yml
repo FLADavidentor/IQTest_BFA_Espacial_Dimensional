@@ -10,6 +10,9 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  mvc:
+    problemdetails:
+      enabled: true   # RFC7807 JSON errors for REST, no stack traces
 
 management:
   endpoints:
@@ -22,3 +25,7 @@ management:
 
 server:
   port: 8080
+  error:
+    include-stacktrace: never   # never leak stack traces to the browser
+    include-message: always
+    include-exception: false

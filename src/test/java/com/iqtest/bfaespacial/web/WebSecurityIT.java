@@ -38,6 +38,16 @@ class WebSecurityIT extends AbstractPostgresIT {
     }
 
     @Test
+    void apiError_sinStackTrace() throws Exception {
+        // integracion endpoint without token -> 401 ProblemDetail, no leaked trace
+        String body = mockMvc.perform(get("/api/integracion/resultados/X/2026-I"))
+                .andExpect(status().isUnauthorized())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(body).doesNotContain("Exception");
+        assertThat(body).doesNotContain("at com.iqtest");
+    }
+
+    @Test
     @WithMockUser(roles = "ESTUDIANTE")
     @Transactional
     void apiSubtestCurrent_sinEsCorrecta() throws Exception {
