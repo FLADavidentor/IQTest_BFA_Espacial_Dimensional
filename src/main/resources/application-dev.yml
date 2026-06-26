@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bfa
+    username: bfa
+    password: bfa
+
+# Stubbed integration values — real impl Phase 6
+app:
+  iqtest:
+    session-attr: cif          # §19 Q2 default: read CIF from HttpSession attribute
+    dev-cif: "DEV0000001"      # STUB — Phase 6 (hardcoded CIF in dev)
+  integracion:
+    token: "dev-service-token" # STUB — Phase 6 (Dashboard Bearer token)

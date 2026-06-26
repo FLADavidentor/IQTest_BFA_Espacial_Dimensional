@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: bfa
+      POSTGRES_USER: bfa
+      POSTGRES_PASSWORD: bfa
+    ports:
+      - "5432:5432"
+    volumes:
+      - bfa-pgdata:/var/lib/postgresql/data
+
+volumes:
+  bfa-pgdata:
