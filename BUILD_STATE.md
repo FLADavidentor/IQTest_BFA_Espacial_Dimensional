@@ -2,7 +2,11 @@ CURRENT_PHASE: PHASE-7-COMPLETE
 LAST_COMPLETED_GATE: Open questions resolved
 OPEN_BLOCKERS: Real IQTest session (Phase 6), real images (client), real item content (client)
 STUBS_ACTIVE: SesionIQTestClient (Phase 6), placeholder images, seeded test items
-RESOLVED_QUESTIONS: Q1 (baremo gaps), Q3 (image base-url config), Q4 (Bearer API key), Q5 (single active version)
+RESOLVED_QUESTIONS: Q1, Q3, Q4, Q5
+  Q3 detail: local filesystem, Spring static resource handler (/img/** -> upload-dir),
+             upload-dir = ${user.home}/bfa-imagenes (configurable), upload endpoint
+             POST /admin/imagenes/upload (type+size validated, filename sanitized, no traversal),
+             ImagenResolver maps stored URLs. MinIO/CDN swap = change base-url + resource handler only, zero app-code change.
 PENDING_EXTERNAL: Q2 (IQTest session contract spec from IQTest team)
 BAREMO: REAL DATA LOADED (V6 from Normas Nac del BFA.10.xlsx) — 119 rows (S1=27, S2=35, ST=57). No longer a blocker.
 
@@ -12,8 +16,9 @@ BAREMO: REAL DATA LOADED (V6 from Normas Nac del BFA.10.xlsx) — 119 rows (S1=2
 - 7-C answer-key leak: audited; zero student-reachable es_correcta (DTO is {id,etiqueta}).
 - 7-D NFR: timer <2s (TimerLatencyIT); results 111ms < 3s (logged); 10 concurrent POST -> all 200, count=10.
 - 7-E a11y: jest-axe zero critical/serious on consigna + subtest view.
-- 7-F open questions: Q1/Q5 documented; Q3 app.imagenes.base-url (ImagenResolver); Q4 app.integracion.api-key Bearer. Q2 external.
-- Tests: 23 java + 5 vitest, all green.
+- 7-F open questions: Q1/Q5 documented; Q3 base-url + upload/static serving (below); Q4 app.integracion.api-key Bearer. Q2 external.
+- Q3 image upload+serving: WebMvcConfig static handler /img/** -> upload-dir (auto-created on startup); ImagenAdminController POST /admin/imagenes/upload (png/jpeg/webp, <=2MB, magic-byte check, sanitized name, traversal-guarded). ImagenUploadIT. Live gates passed.
+- Tests: 26 java + 5 vitest, all green.
 
 ## P0/P1/P2 remediation (all gates passed)
 - P0-A image fallback: ReactivoCard onError placeholder + enunciado_texto (V3). Vitest.

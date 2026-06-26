@@ -19,7 +19,12 @@ public class ImagenResolver {
 
     public String resolve(String stored) {
         if (stored == null || stored.isBlank()) return stored;
-        if (stored.startsWith("http://") || stored.startsWith("https://")) return stored;
-        return baseUrl + (stored.startsWith("/") ? stored : "/" + stored);
+        // Already a usable URL: absolute (CDN) or root-relative (e.g. the /img/... path the
+        // upload endpoint returns, served by the static handler at the same origin).
+        if (stored.startsWith("http://") || stored.startsWith("https://") || stored.startsWith("/")) {
+            return stored;
+        }
+        // Bare key (e.g. "s1a/1.png") -> prefix the configured base (local or CDN host).
+        return baseUrl + "/" + stored;
     }
 }

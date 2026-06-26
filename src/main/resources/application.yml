@@ -10,9 +10,14 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 2MB      # §19 Q3 image upload cap (also checked in code)
+      max-request-size: 2MB
 app:
   imagenes:
-    base-url: /img       # §19 Q3 — image store root; switch local<->CDN here, not in code
+    base-url: /img                          # §19 Q3 — web path; switch local<->CDN here, not in code
+    upload-dir: ${user.home}/bfa-imagenes   # disk location Spring serves /img/** from
   integracion:
     json-format: SNAKE   # CAMEL | SNAKE — Dashboard payload key style (§19 Q4); default snake_case
 

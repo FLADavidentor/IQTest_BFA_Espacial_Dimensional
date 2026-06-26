@@ -8,6 +8,7 @@ app:
   periodo-academico-actual: ${PERIODO_ACTUAL}
   imagenes:
     base-url: ${IMAGENES_BASE_URL}
+    upload-dir: ${IMAGENES_UPLOAD_DIR}
   iqtest:
     session-attr: cif
     dev-cif: ${DEV_CIF:UNUSED}
