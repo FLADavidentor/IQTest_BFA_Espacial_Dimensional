@@ -4,3 +4,6 @@ frontend/dist/
 src/main/resources/static/react/
 *.log
 .DS_Store
+
+# Windows alternate-data-stream junk
+*:Zone.Identifier
