@@ -9,23 +9,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@Testcontainers
 @Transactional
-class DataLayerIT {
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16");
+class DataLayerIT extends AbstractPostgresIT {
 
     @PersistenceContext
     EntityManager em;
@@ -35,7 +24,6 @@ class DataLayerIT {
 
     @Test
     void insertChain_readsBackGeneratedColumns() {
-        // version -> reactivo -> opcion (A correct)
         VersionFormulario version = new VersionFormulario();
         version.setAnio((short) 2026);
         version.setNumeroVersion((short) 1);
@@ -55,7 +43,6 @@ class DataLayerIT {
         opcionA.setEsCorrecta(true);
         em.persist(opcionA);
 
-        // intento -> ejecucion -> respuesta
         Intento intento = new Intento();
         intento.setCif("DEV0000001");
         intento.setPeriodoAcademico("2026-I");
@@ -73,10 +60,8 @@ class DataLayerIT {
         respuesta.setReactivo(reactivo);
         respuesta.setOpcionReactivo(opcionA);
         em.persist(respuesta);
-
         em.flush();
 
-        // resultado with GENERATED columns
         Resultado r = new Resultado();
         r.setIntentoId(intento.getId());
         r.setPdS1a((short) 10);
@@ -89,10 +74,9 @@ class DataLayerIT {
         em.flush();
         em.refresh(r);
 
-        assertThat(r.getPdS1()).isEqualTo((short) 15);  // pd_s1a + pd_s1b
-        assertThat(r.getPdSt()).isEqualTo((short) 23);  // + pd_s2
+        assertThat(r.getPdS1()).isEqualTo((short) 15);
+        assertThat(r.getPdSt()).isEqualTo((short) 23);
 
-        // read back the answer chain
         Respuesta loaded = em.find(Respuesta.class, respuesta.getId());
         assertThat(loaded.getOpcionReactivo().isEsCorrecta()).isTrue();
         assertThat(loaded.getEjecucionSubtest().getTipoSubtest()).isEqualTo(TipoSubtest.S1A);
@@ -100,10 +84,8 @@ class DataLayerIT {
 
     @Test
     void baremoLookup_knownPercentile() {
-        // In-test rows (real Normas data loaded later as V5 — OPEN_BLOCKER)
         baremoRepo.save(new Baremo(FactorEspacial.S1, (short) 30, (short) 75));
         baremoRepo.flush();
-
         Baremo found = baremoRepo.findById(new BaremoId(FactorEspacial.S1, (short) 30)).orElseThrow();
         assertThat(found.getPercentil()).isEqualTo((short) 75);
     }

@@ -1,8 +1,10 @@
-CURRENT_PHASE: 2 — Evaluation Subsystem
-LAST_COMPLETED_GATE: Phase 1 — DataLayerIT green (GENERATED pd_s1/pd_st read back; baremo lookup); \d resultado + opcion_reactivo match §5
+CURRENT_PHASE: 3 — Scoring Subsystem
+LAST_COMPLETED_GATE: Phase 2 — IntentoServiceIT (conflict) + SubtestServiceIT (answer-after-close) + TimerServiceIT (expiry close) green (5/5 suite)
 NOTES:
   - Flyway: V1 schema + V2 config seed only. V3 baremo -> deferred to V5 (real Excel). V4 admin -> N/A (no users table in §5; admins via SecurityConfig Phase 4).
   - Testcontainers needs api.version=1.44 (Docker 29 min API) -> set in surefire systemPropertyVariables. Tests run via ./mvnw test (surefire includes *IT).
+  - Scoring trigger decoupled: SubtestService publishes IntentoListoParaCalificarEvent on S1B close. CalificacionService listens in Phase 3.
+  - Tests share one PG container (AbstractPostgresIT singleton).
 OPEN_BLOCKERS:
   - BAREMO_DATA: needs Normas_Nac_del_BFA_10.xlsx (user-provided). Blocks V3 seed + real-percentile gate assertions in Phase 1 & 3. Logic still built/tested with in-test rows.
   - INTEGRATION_CONTRACT: §19 Q2 (session) + Q4 (dashboard token) external. Stubbed to Phase 6.
