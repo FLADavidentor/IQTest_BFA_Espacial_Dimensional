@@ -23,6 +23,8 @@ import java.time.OffsetDateTime;
 @Service
 public class CalificacionService {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CalificacionService.class);
+
     private final RespuestaRepository respuestaRepo;
     private final ResultadoRepository resultadoRepo;
     private final IntentoRepository intentoRepo;
@@ -48,6 +50,7 @@ public class CalificacionService {
 
     @Transactional
     public Resultado calificar(Long intentoId) {
+        long t0 = System.nanoTime();
         Intento intento = intentoRepo.findById(intentoId)
                 .orElseThrow(() -> new IllegalArgumentException("Intento no existe: " + intentoId));
 
@@ -84,6 +87,8 @@ public class CalificacionService {
 
         auditoria.registrar(intentoId, intento.getCif(), "RESULTADO_CALCULADO",
                 "pd_s1a=%d pd_s1b=%d pd_s2=%d perc_st=%d".formatted(pdS1a, pdS1b, pdS2, pSt.percentil()));
+        long ms = (System.nanoTime() - t0) / 1_000_000;
+        log.info("RESULTADO_CALCULADO intento={} en {}ms (NFR RN-BFA-06 < 3000)", intentoId, ms);
         return saved;
     }
 
