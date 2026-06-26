@@ -48,7 +48,18 @@ public class SubtestApiController {
 
     @GetMapping("/subtest/current")
     public SubtestActual current() {
+        return buildActual(intentoActual());
+    }
+
+    /** Student clicked "Comenzar" (after the consigna): start the timer now (P1-A). */
+    @PostMapping("/subtest/iniciar")
+    public SubtestActual iniciar() {
         Intento intento = intentoActual();
+        subtestService.comenzarSubtest(intento.getId());
+        return buildActual(intento);
+    }
+
+    private SubtestActual buildActual(Intento intento) {
         VistaActual va = subtestService.vistaActual(intento.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sin subtest en curso"));
         EjecucionSubtest e = va.ejecucion();
@@ -71,11 +82,10 @@ public class SubtestApiController {
     @GetMapping("/subtest/tiempo-restante")
     public Tiempo tiempoRestante() {
         Intento intento = intentoActual();
-        EjecucionSubtest e = ejecucionRepo.findFirstByIntentoIdOrderByFechaInicioDesc(intento.getId())
+        VistaActual va = subtestService.vistaActual(intento.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sin subtest"));
-        long restante = e.getEstado() == com.iqtest.bfaespacial.domain.enums.EstadoSubtest.EN_CURSO
-                ? subtestService.tiempoRestanteSeg(e) : 0;
-        return new Tiempo(restante, e.getTipoSubtest().name(), e.getEstado().name());
+        return new Tiempo(va.tiempoRestanteSeg(), va.ejecucion().getTipoSubtest().name(),
+                va.ejecucion().getEstado().name());
     }
 
     @PostMapping("/respuesta")
@@ -113,13 +123,11 @@ public class SubtestApiController {
         VistaActual va = subtestService.vistaActual(intento.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sin subtest en curso"));
         TipoSubtest actual = va.ejecucion().getTipoSubtest();
+        // cerrar advances to the next subtest (PENDIENTE) internally.
         subtestService.cerrar(va.ejecucion().getId(), false);
 
         return subtestService.siguiente(actual)
-                .map(next -> {
-                    subtestService.iniciar(intento.getId(), next);
-                    return new CerrarResult(next.name());
-                })
+                .map(next -> new CerrarResult(next.name()))
                 .orElse(new CerrarResult("COMPLETADO"));
     }
 

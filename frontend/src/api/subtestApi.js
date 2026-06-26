@@ -27,6 +27,9 @@ export const postSync = (respuestas) =>
     body: JSON.stringify({ respuestas }),
   }).then(json);
 
+export const postIniciar = () =>
+  fetch('/api/subtest/iniciar', { method: 'POST', credentials: 'same-origin' }).then(json);
+
 export const postCerrar = () =>
   fetch('/api/subtest/cerrar', { method: 'POST', credentials: 'same-origin' }).then(json);
 

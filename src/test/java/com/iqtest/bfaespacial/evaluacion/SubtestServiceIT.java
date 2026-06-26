@@ -41,7 +41,8 @@ class SubtestServiceIT extends AbstractPostgresIT {
         em.persist(intento);
         em.flush();
 
-        EjecucionSubtest ejec = subtestService.iniciar(intento.getId(), TipoSubtest.S1A);
+        subtestService.prepararSubtest(intento.getId(), TipoSubtest.S1A);
+        EjecucionSubtest ejec = subtestService.comenzarSubtest(intento.getId());
 
         // answer accepted while EN_CURSO
         subtestService.registrarRespuesta(ejec.getId(), reactivo.getId(), null);

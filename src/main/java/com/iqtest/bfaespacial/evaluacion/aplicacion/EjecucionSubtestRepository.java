@@ -18,6 +18,10 @@ public interface EjecucionSubtestRepository extends JpaRepository<EjecucionSubte
     // Latest execution regardless of state — lets the SPA detect server-side closure.
     Optional<EjecucionSubtest> findFirstByIntentoIdOrderByFechaInicioDesc(Long intentoId);
 
+    // Current active subtest: the not-yet-finished one (PENDIENTE or EN_CURSO).
+    Optional<EjecucionSubtest> findFirstByIntentoIdAndEstadoInOrderByIdAsc(
+            Long intentoId, java.util.Collection<com.iqtest.bfaespacial.domain.enums.EstadoSubtest> estados);
+
     /** Server-side timer (§12): EN_CURSO executions past fecha_inicio + tiempo_limite_seg. */
     @Query(value = """
             SELECT e.id FROM ejecucion_subtest e

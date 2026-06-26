@@ -2,21 +2,27 @@ import React, { useCallback, useEffect, useState } from 'react';
 import CountdownTimer from './components/CountdownTimer';
 import ReactivoCard from './components/ReactivoCard';
 import ProgressBar from './components/ProgressBar';
+import ConsignaScreen from './components/ConsignaScreen';
 import {
-  getCurrent, getTiempoRestante, postRespuesta, postCerrar,
+  getCurrent, getTiempoRestante, postIniciar, postRespuesta, postCerrar,
   bufferAnswer, flushBuffer,
 } from './api/subtestApi';
 
+// view: loading | consigna | test | agotado | completado
 export default function SubtestApp() {
-  const [data, setData] = useState(null);     // SubtestActual
-  const [answers, setAnswers] = useState({}); // reactivoId -> opcionId
-  const [cerrado, setCerrado] = useState(false);
+  const [view, setView] = useState('loading');
+  const [data, setData] = useState(null);
+  const [answers, setAnswers] = useState({});
 
   const cargar = useCallback(async () => {
-    const d = await getCurrent();
-    setData(d);
-    setAnswers({});
-    setCerrado(d.estado !== 'EN_CURSO');
+    try {
+      const d = await getCurrent();
+      setData(d);
+      setAnswers({});
+      setView(d.estado === 'EN_CURSO' ? 'test' : 'consigna'); // PENDIENTE -> consigna
+    } catch (e) {
+      if (e.status === 404) setView('completado'); // no active subtest left
+    }
   }, []);
 
   useEffect(() => { cargar(); }, [cargar]);
@@ -28,56 +34,75 @@ export default function SubtestApp() {
     return () => window.removeEventListener('online', onOnline);
   }, [data]);
 
-  // Poll server for closure (server enforces timer). 30s per §11.
+  // Poll for server-side closure while taking the test (§11). SSE replaces this in P2-A.
   useEffect(() => {
-    if (!data || cerrado) return;
+    if (view !== 'test') return;
     const id = setInterval(async () => {
       try {
         const t = await getTiempoRestante();
-        if (t.estado !== 'EN_CURSO') setCerrado(true);
-      } catch { /* ignore transient */ }
+        if (t.estado !== 'EN_CURSO') setView('agotado'); // server closed it
+      } catch { setView('agotado'); }
     }, 30000);
     return () => clearInterval(id);
-  }, [data, cerrado]);
+  }, [view]);
+
+  const comenzar = async () => {
+    await postIniciar();      // server sets fecha_inicio = NOW
+    await cargar();           // reload -> EN_CURSO -> test view
+  };
 
   const seleccionar = async (reactivoId, opcionId) => {
     setAnswers((a) => ({ ...a, [reactivoId]: opcionId }));
     try {
       await postRespuesta(data.ejecucionSubtestId, reactivoId, opcionId);
     } catch (e) {
-      if (e.status === 409 || e.status === 423) setCerrado(true);
+      if (e.status === 409 || e.status === 423) setView('agotado');
       else bufferAnswer(data.ejecucionSubtestId, reactivoId, opcionId); // offline
     }
   };
 
-  const cerrar = useCallback(async () => {
-    if (cerrado) return;
-    setCerrado(true);
+  const expirar = useCallback(async () => {
+    setView('agotado');
+    try { await postCerrar(); } catch { /* server may have closed already */ }
+  }, []);
+
+  const finalizar = useCallback(async () => {
     try {
       const r = await postCerrar();
-      if (r.next === 'COMPLETADO') window.location.href = '/evaluacion/completado';
-      else await cargar(); // advance to next subtest
-    } catch { /* server may have closed already */ }
-  }, [cerrado, cargar]);
+      if (r.next === 'COMPLETADO') { window.location.href = '/evaluacion/completado'; return; }
+    } catch { /* ignore */ }
+    await cargar();
+  }, [cargar]);
 
   // Auto-submit when all items answered.
   useEffect(() => {
-    if (data && !cerrado && data.items.length > 0
+    if (view === 'test' && data && data.items.length > 0
         && Object.keys(answers).length === data.items.length) {
-      cerrar();
+      finalizar();
     }
-  }, [answers, data, cerrado, cerrar]);
+  }, [answers, data, view, finalizar]);
 
-  if (!data) return <p>Cargando…</p>;
-  if (cerrado) return <div className="bfa-cerrado"><h2>Tiempo agotado</h2><p>Este subtest está cerrado.</p></div>;
+  if (view === 'loading') return <p>Cargando…</p>;
+  if (view === 'completado') return <div className="bfa-completado"><h2>Evaluación completada</h2></div>;
+  if (view === 'consigna') return <ConsignaScreen subtestType={data.subtestType} onComenzar={comenzar} />;
+  if (view === 'agotado') {
+    return (
+      <div className="bfa-agotado">
+        <h2>Tiempo agotado</h2>
+        <p>Este subtest se ha cerrado.</p>
+        <button type="button" onClick={cargar}>Continuar</button>
+      </div>
+    );
+  }
 
+  // view === 'test'
   const answered = Object.keys(answers).length;
   return (
     <div className="bfa-subtest">
       <header>
         <h1>Subtest {data.subtestType}</h1>
-        <CountdownTimer seconds={data.tiempoRestanteSeg} onExpire={cerrar} />
-        <ProgressBar answered={answered} total={data.items.length} />
+        <CountdownTimer seconds={data.tiempoRestanteSeg} onExpire={expirar} />
+        <ProgressBar answered={Object.keys(answers).length} total={data.items.length} />
       </header>
       {data.items.map((item) => (
         <ReactivoCard key={item.id} item={item} selected={answers[item.id]} onSelect={seleccionar} />

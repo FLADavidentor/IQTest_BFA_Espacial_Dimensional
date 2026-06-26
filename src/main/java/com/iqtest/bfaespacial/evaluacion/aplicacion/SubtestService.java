@@ -41,15 +41,20 @@ public class SubtestService {
         this.em = em;
     }
 
-    /** Current EN_CURSO execution for an intento plus server-computed remaining seconds (§12). */
+    private static final List<EstadoSubtest> ACTIVOS = List.of(EstadoSubtest.PENDIENTE, EstadoSubtest.EN_CURSO);
+
+    /** Current active subtest (PENDIENTE or EN_CURSO) plus server-computed remaining seconds (§12). */
     @Transactional(readOnly = true)
     public Optional<VistaActual> vistaActual(Long intentoId) {
-        return ejecucionRepo.findFirstByIntentoIdAndEstado(intentoId, EstadoSubtest.EN_CURSO)
+        return ejecucionRepo.findFirstByIntentoIdAndEstadoInOrderByIdAsc(intentoId, ACTIVOS)
                 .map(e -> new VistaActual(e, tiempoRestanteSeg(e)));
     }
 
     public long tiempoRestanteSeg(EjecucionSubtest e) {
         int limite = configRepo.findById(e.getTipoSubtest()).orElseThrow().getTiempoLimiteSeg();
+        if (e.getFechaInicio() == null) {
+            return limite; // PENDIENTE — not started yet, full time shown on the consigna
+        }
         long transcurrido = Duration.between(e.getFechaInicio(), OffsetDateTime.now()).getSeconds();
         return Math.max(0, limite - transcurrido);
     }
@@ -60,18 +65,32 @@ public class SubtestService {
         return (i >= 0 && i < SECUENCIA.size() - 1) ? Optional.of(SECUENCIA.get(i + 1)) : Optional.empty();
     }
 
-    /** Start (or return existing) timed execution. Sets fecha_inicio = NOW (server clock). */
+    /** Create (or return) a PENDIENTE execution. Timer does NOT start here (P1-A). */
     @Transactional
-    public EjecucionSubtest iniciar(Long intentoId, TipoSubtest tipo) {
+    public EjecucionSubtest prepararSubtest(Long intentoId, TipoSubtest tipo) {
         return ejecucionRepo.findByIntentoIdAndTipoSubtest(intentoId, tipo)
                 .orElseGet(() -> {
                     EjecucionSubtest e = new EjecucionSubtest();
                     e.setIntento(em.getReference(Intento.class, intentoId));
                     e.setTipoSubtest(tipo);
-                    e.setEstado(EstadoSubtest.EN_CURSO);
-                    e.setFechaInicio(OffsetDateTime.now());
+                    e.setEstado(EstadoSubtest.PENDIENTE); // fecha_inicio stays NULL
                     return ejecucionRepo.save(e);
                 });
+    }
+
+    /**
+     * Student clicked "Comenzar": start the current PENDIENTE subtest and set fecha_inicio = NOW.
+     * Idempotent on resume — an already EN_CURSO subtest keeps its original fecha_inicio (RN-BFA-09).
+     */
+    @Transactional
+    public EjecucionSubtest comenzarSubtest(Long intentoId) {
+        EjecucionSubtest e = ejecucionRepo.findFirstByIntentoIdAndEstadoInOrderByIdAsc(intentoId, ACTIVOS)
+                .orElseThrow(() -> new IllegalStateException("No hay subtest por comenzar"));
+        if (e.getEstado() == EstadoSubtest.PENDIENTE) {
+            e.setEstado(EstadoSubtest.EN_CURSO);
+            e.setFechaInicio(OffsetDateTime.now());
+        }
+        return e;
     }
 
     /** Upsert one answer. Rejected if the subtest is not EN_CURSO (RN-BFA-05). */
@@ -107,8 +126,12 @@ public class SubtestService {
         ejec.setCerradaPorTiempo(porTiempo);
         ejec.setFechaCierre(OffsetDateTime.now());
 
+        Long intentoId = ejec.getIntento().getId();
         if (ejec.getTipoSubtest() == ULTIMO_SUBTEST) {
-            events.publishEvent(new IntentoListoParaCalificarEvent(ejec.getIntento().getId()));
+            events.publishEvent(new IntentoListoParaCalificarEvent(intentoId));
+        } else {
+            // Advance: prepare the next subtest as PENDIENTE (works for manual and timer closure).
+            siguiente(ejec.getTipoSubtest()).ifPresent(next -> prepararSubtest(intentoId, next));
         }
     }
 }

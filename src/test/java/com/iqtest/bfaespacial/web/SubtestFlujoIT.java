@@ -82,11 +82,17 @@ class SubtestFlujoIT extends AbstractPostgresIT {
         ejec.setFechaInicio(OffsetDateTime.now().minusSeconds(1000));
         em.flush();
         timerService.cerrarExpirados();
+        em.clear();
 
-        // SPA poll now sees closed state
-        mockMvc.perform(get("/api/subtest/tiempo-restante").session(session))
+        // S1A is closed by time (server-enforced)
+        EjecucionSubtest reloaded = em.find(EjecucionSubtest.class, ejec.getId());
+        org.assertj.core.api.Assertions.assertThat(reloaded.getEstado())
+                .isEqualTo(EstadoSubtest.CERRADO_POR_TIEMPO);
+
+        // flow advanced to the next subtest as PENDIENTE (consigna not yet started -> full time)
+        mockMvc.perform(get("/api/subtest/current").session(session))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.estado").value("CERRADO_POR_TIEMPO"))
-                .andExpect(jsonPath("$.tiempoRestanteSeg").value(0));
+                .andExpect(jsonPath("$.subtestType").value("S2"))
+                .andExpect(jsonPath("$.estado").value("PENDIENTE"));
     }
 }

@@ -29,7 +29,8 @@ public class IntentoController {
         Intento intento = intentoService.iniciarOReanudar(sesion.cifActual(), sesion.periodoActual());
         if (intento.getEstado() == EstadoIntento.ACTIVO
                 && subtestService.vistaActual(intento.getId()).isEmpty()) {
-            subtestService.iniciar(intento.getId(), TipoSubtest.S1A); // start first subtest
+            // Prepare the first subtest as PENDIENTE; timer starts only on "Comenzar" (P1-A).
+            subtestService.prepararSubtest(intento.getId(), TipoSubtest.S1A);
         }
         model.addAttribute("intento", intento);
         model.addAttribute("completado", intento.getEstado() == EstadoIntento.COMPLETADO);

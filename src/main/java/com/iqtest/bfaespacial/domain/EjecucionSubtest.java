@@ -29,8 +29,9 @@ public class EjecucionSubtest {
     @Column(name = "tipo_subtest", columnDefinition = "tipo_subtest", nullable = false)
     private TipoSubtest tipoSubtest;
 
-    @Column(name = "fecha_inicio", nullable = false)
-    private OffsetDateTime fechaInicio = OffsetDateTime.now();
+    // NULL until the student starts the subtest (P1-A); set by comenzarSubtest.
+    @Column(name = "fecha_inicio")
+    private OffsetDateTime fechaInicio;
 
     @Column(name = "fecha_cierre")
     private OffsetDateTime fechaCierre;
