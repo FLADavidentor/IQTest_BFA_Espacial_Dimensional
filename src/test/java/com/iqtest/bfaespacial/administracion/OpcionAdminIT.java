@@ -1,12 +1,12 @@
 package com.iqtest.bfaespacial.administracion;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
-import com.iqtest.bfaespacial.administracion.catalogo.OpcionReactivoRepository;
-import com.iqtest.bfaespacial.administracion.catalogo.OpcionReactivoService;
-import com.iqtest.bfaespacial.domain.OpcionReactivo;
-import com.iqtest.bfaespacial.domain.Reactivo;
-import com.iqtest.bfaespacial.domain.VersionFormulario;
-import com.iqtest.bfaespacial.domain.enums.TipoSubtest;
+import com.iqtest.bfaespacial.repository.OpcionReactivoRepository;
+import com.iqtest.bfaespacial.service.OpcionReactivoService;
+import com.iqtest.bfaespacial.model.OpcionReactivo;
+import com.iqtest.bfaespacial.model.Reactivo;
+import com.iqtest.bfaespacial.model.VersionFormulario;
+import com.iqtest.bfaespacial.model.TipoSubtest;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
@@ -73,3 +73,4 @@ class OpcionAdminIT extends AbstractPostgresIT {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Subir imagen")));
     }
 }
+

@@ -1,9 +1,10 @@
 package com.iqtest.bfaespacial.web;
+import com.iqtest.bfaespacial.service.SesionIQTestClient;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
-import com.iqtest.bfaespacial.domain.*;
-import com.iqtest.bfaespacial.domain.enums.EstadoSubtest;
-import com.iqtest.bfaespacial.domain.enums.TipoSubtest;
+import com.iqtest.bfaespacial.model.*;
+import com.iqtest.bfaespacial.model.EstadoSubtest;
+import com.iqtest.bfaespacial.model.TipoSubtest;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
@@ -94,3 +95,4 @@ class WebSecurityIT extends AbstractPostgresIT {
         assertThat(body).doesNotContain("es_correcta");
     }
 }
+

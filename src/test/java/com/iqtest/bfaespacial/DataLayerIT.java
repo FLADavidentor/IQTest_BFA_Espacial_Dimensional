@@ -1,10 +1,10 @@
 package com.iqtest.bfaespacial;
 
-import com.iqtest.bfaespacial.domain.*;
-import com.iqtest.bfaespacial.domain.enums.EstadoSubtest;
-import com.iqtest.bfaespacial.domain.enums.FactorEspacial;
-import com.iqtest.bfaespacial.domain.enums.TipoSubtest;
-import com.iqtest.bfaespacial.resultados.percentiles.BaremoRepository;
+import com.iqtest.bfaespacial.model.*;
+import com.iqtest.bfaespacial.model.EstadoSubtest;
+import com.iqtest.bfaespacial.model.FactorEspacial;
+import com.iqtest.bfaespacial.model.TipoSubtest;
+import com.iqtest.bfaespacial.repository.BaremoRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
@@ -90,3 +90,4 @@ class DataLayerIT extends AbstractPostgresIT {
         assertThat(found.getPercentil()).isEqualTo((short) 75);
     }
 }
+

@@ -1,9 +1,9 @@
 package com.iqtest.bfaespacial.resultados;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
-import com.iqtest.bfaespacial.domain.enums.FactorEspacial;
-import com.iqtest.bfaespacial.resultados.percentiles.PercentilService;
-import com.iqtest.bfaespacial.resultados.percentiles.PercentilService.PercentilResultado;
+import com.iqtest.bfaespacial.model.FactorEspacial;
+import com.iqtest.bfaespacial.service.PercentilService;
+import com.iqtest.bfaespacial.service.PercentilService.PercentilResultado;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,3 +31,4 @@ class PercentilRealIT extends AbstractPostgresIT {
                 .isEqualTo(new PercentilResultado((short) 90, true));
     }
 }
+

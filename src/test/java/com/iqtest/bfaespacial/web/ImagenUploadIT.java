@@ -1,4 +1,5 @@
 package com.iqtest.bfaespacial.web;
+import com.iqtest.bfaespacial.model.TipoSubtest;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
 import org.junit.jupiter.api.Test;

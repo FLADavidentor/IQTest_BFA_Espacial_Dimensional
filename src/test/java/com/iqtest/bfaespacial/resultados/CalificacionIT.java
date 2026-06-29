@@ -1,15 +1,15 @@
 package com.iqtest.bfaespacial.resultados;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
-import com.iqtest.bfaespacial.administracion.auditoria.RegistroAuditoriaRepository;
-import com.iqtest.bfaespacial.domain.*;
-import com.iqtest.bfaespacial.domain.enums.EstadoIntento;
-import com.iqtest.bfaespacial.domain.enums.EstadoSubtest;
-import com.iqtest.bfaespacial.domain.enums.FactorEspacial;
-import com.iqtest.bfaespacial.domain.enums.TipoSubtest;
-import com.iqtest.bfaespacial.evaluacion.gestion.IntentoRepository;
-import com.iqtest.bfaespacial.resultados.calificacion.CalificacionService;
-import com.iqtest.bfaespacial.resultados.percentiles.BaremoRepository;
+import com.iqtest.bfaespacial.repository.RegistroAuditoriaRepository;
+import com.iqtest.bfaespacial.model.*;
+import com.iqtest.bfaespacial.model.EstadoIntento;
+import com.iqtest.bfaespacial.model.EstadoSubtest;
+import com.iqtest.bfaespacial.model.FactorEspacial;
+import com.iqtest.bfaespacial.model.TipoSubtest;
+import com.iqtest.bfaespacial.repository.IntentoRepository;
+import com.iqtest.bfaespacial.service.CalificacionService;
+import com.iqtest.bfaespacial.repository.BaremoRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
@@ -108,3 +108,4 @@ class CalificacionIT extends AbstractPostgresIT {
         em.persist(rsp);
     }
 }
+

@@ -1,10 +1,10 @@
 package com.iqtest.bfaespacial.administracion;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
-import com.iqtest.bfaespacial.administracion.catalogo.VersionFormularioRepository;
-import com.iqtest.bfaespacial.administracion.catalogo.VersionFormularioService;
-import com.iqtest.bfaespacial.administracion.catalogo.VersionFormularioService.ActivacionRequiereConfirmacion;
-import com.iqtest.bfaespacial.domain.VersionFormulario;
+import com.iqtest.bfaespacial.repository.VersionFormularioRepository;
+import com.iqtest.bfaespacial.service.VersionFormularioService;
+import com.iqtest.bfaespacial.service.VersionFormularioService.ActivacionRequiereConfirmacion;
+import com.iqtest.bfaespacial.model.VersionFormulario;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,3 +34,4 @@ class VersionAdminIT extends AbstractPostgresIT {
         assertThat(repo.findByAnio((short) 2026).stream().filter(VersionFormulario::isActiva).count()).isEqualTo(1);
     }
 }
+

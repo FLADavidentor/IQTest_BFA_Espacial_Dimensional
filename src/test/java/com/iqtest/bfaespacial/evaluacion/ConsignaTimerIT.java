@@ -1,12 +1,12 @@
 package com.iqtest.bfaespacial.evaluacion;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
-import com.iqtest.bfaespacial.domain.EjecucionSubtest;
-import com.iqtest.bfaespacial.domain.Intento;
-import com.iqtest.bfaespacial.domain.VersionFormulario;
-import com.iqtest.bfaespacial.domain.enums.EstadoSubtest;
-import com.iqtest.bfaespacial.domain.enums.TipoSubtest;
-import com.iqtest.bfaespacial.evaluacion.aplicacion.SubtestService;
+import com.iqtest.bfaespacial.model.EjecucionSubtest;
+import com.iqtest.bfaespacial.model.Intento;
+import com.iqtest.bfaespacial.model.VersionFormulario;
+import com.iqtest.bfaespacial.model.EstadoSubtest;
+import com.iqtest.bfaespacial.model.TipoSubtest;
+import com.iqtest.bfaespacial.service.SubtestService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
@@ -41,3 +41,4 @@ class ConsignaTimerIT extends AbstractPostgresIT {
         assertThat(started.getFechaInicio()).isNotNull();           // timer started on Comenzar
     }
 }
+
