@@ -5,6 +5,11 @@ const json = (r) => {
   return r.status === 200 ? r.json().catch(() => ({})) : {};
 };
 
+const getCsrfToken = () => {
+  const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : '';
+};
+
 export const getCurrent = () =>
   fetch('/api/subtest/current', { credentials: 'same-origin' }).then(json);
 
@@ -15,7 +20,10 @@ export const postRespuesta = (ejecucionSubtestId, reactivoId, opcionReactivoId) 
   fetch('/api/respuesta', {
     method: 'POST',
     credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'X-XSRF-TOKEN': getCsrfToken()
+    },
     body: JSON.stringify({ ejecucionSubtestId, reactivoId, opcionReactivoId }),
   }).then(json);
 
@@ -23,15 +31,30 @@ export const postSync = (respuestas) =>
   fetch('/api/respuesta/sync', {
     method: 'POST',
     credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'X-XSRF-TOKEN': getCsrfToken()
+    },
     body: JSON.stringify({ respuestas }),
   }).then(json);
 
 export const postIniciar = () =>
-  fetch('/api/subtest/iniciar', { method: 'POST', credentials: 'same-origin' }).then(json);
+  fetch('/api/subtest/iniciar', { 
+    method: 'POST', 
+    credentials: 'same-origin',
+    headers: {
+      'X-XSRF-TOKEN': getCsrfToken()
+    }
+  }).then(json);
 
 export const postCerrar = () =>
-  fetch('/api/subtest/cerrar', { method: 'POST', credentials: 'same-origin' }).then(json);
+  fetch('/api/subtest/cerrar', { 
+    method: 'POST', 
+    credentials: 'same-origin',
+    headers: {
+      'X-XSRF-TOKEN': getCsrfToken()
+    }
+  }).then(json);
 
 // --- offline answer buffer (sessionStorage), keyed per execution (RN-BFA-09) ---
 

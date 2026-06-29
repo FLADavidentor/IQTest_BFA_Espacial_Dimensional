@@ -2,6 +2,15 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head><meta charset="UTF-8"><title>BFA Espacial — Inicio</title></head>
 <body>
+  <div style="background-color: #f1f5f9; padding: 10px 20px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center;" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div>
+      <strong>Usuario:</strong> <span sec:authentication="name">User</span> | 
+      <strong>Rol actual:</strong> <span sec:authentication="principal.authorities">Rol</span>
+    </div>
+    <form th:action="@{/logout}" method="post" style="margin: 0;">
+      <button type="submit" style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
+    </form>
+  </div>
   <h1>Evaluación BFA Espacial</h1>
   <p>CIF: <span th:text="${intento.cif}">—</span></p>
   <p>Periodo: <span th:text="${intento.periodoAcademico}">—</span></p>
