@@ -1,14 +1,14 @@
 package com.iqtest.bfaespacial.evaluacion;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
-import com.iqtest.bfaespacial.administracion.catalogo.VersionFormularioRepository;
-import com.iqtest.bfaespacial.domain.EjecucionSubtest;
-import com.iqtest.bfaespacial.domain.Intento;
-import com.iqtest.bfaespacial.domain.VersionFormulario;
-import com.iqtest.bfaespacial.domain.enums.EstadoSubtest;
-import com.iqtest.bfaespacial.domain.enums.TipoSubtest;
-import com.iqtest.bfaespacial.evaluacion.aplicacion.EjecucionSubtestRepository;
-import com.iqtest.bfaespacial.evaluacion.gestion.IntentoRepository;
+import com.iqtest.bfaespacial.repository.VersionFormularioRepository;
+import com.iqtest.bfaespacial.model.EjecucionSubtest;
+import com.iqtest.bfaespacial.model.Intento;
+import com.iqtest.bfaespacial.model.VersionFormulario;
+import com.iqtest.bfaespacial.model.EstadoSubtest;
+import com.iqtest.bfaespacial.model.TipoSubtest;
+import com.iqtest.bfaespacial.repository.EjecucionSubtestRepository;
+import com.iqtest.bfaespacial.repository.IntentoRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -51,3 +51,4 @@ class TimerLatencyIT extends AbstractPostgresIT {
         assertThat(elapsed).as("scheduler close latency ms").isGreaterThan(0).isLessThan(2000);
     }
 }
+

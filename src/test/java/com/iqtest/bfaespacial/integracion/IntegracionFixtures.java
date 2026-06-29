@@ -1,8 +1,8 @@
 package com.iqtest.bfaespacial.integracion;
 
-import com.iqtest.bfaespacial.domain.Intento;
-import com.iqtest.bfaespacial.domain.Resultado;
-import com.iqtest.bfaespacial.domain.VersionFormulario;
+import com.iqtest.bfaespacial.model.Intento;
+import com.iqtest.bfaespacial.model.Resultado;
+import com.iqtest.bfaespacial.model.VersionFormulario;
 import jakarta.persistence.EntityManager;
 
 /** Shared seed: an intento with a computed resultado (pd_s1=18, perc_st=48). */
@@ -26,3 +26,4 @@ final class IntegracionFixtures {
         em.flush();
     }
 }
+

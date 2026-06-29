@@ -1,10 +1,10 @@
 package com.iqtest.bfaespacial.web;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
-import com.iqtest.bfaespacial.domain.*;
-import com.iqtest.bfaespacial.domain.enums.EstadoSubtest;
-import com.iqtest.bfaespacial.domain.enums.TipoSubtest;
-import com.iqtest.bfaespacial.evaluacion.aplicacion.TimerService;
+import com.iqtest.bfaespacial.model.*;
+import com.iqtest.bfaespacial.model.EstadoSubtest;
+import com.iqtest.bfaespacial.model.TipoSubtest;
+import com.iqtest.bfaespacial.service.TimerService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
@@ -96,3 +96,4 @@ class SubtestFlujoIT extends AbstractPostgresIT {
                 .andExpect(jsonPath("$.estado").value("PENDIENTE"));
     }
 }
+

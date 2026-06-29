@@ -6,3 +6,4 @@ public class SubtestCerradoException extends RuntimeException {
         super("La ejecución de subtest %d está cerrada".formatted(ejecucionId));
     }
 }
+

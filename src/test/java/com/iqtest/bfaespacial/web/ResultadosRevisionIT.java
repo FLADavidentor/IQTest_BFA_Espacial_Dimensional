@@ -1,9 +1,9 @@
 package com.iqtest.bfaespacial.web;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
-import com.iqtest.bfaespacial.domain.*;
-import com.iqtest.bfaespacial.domain.enums.EstadoSubtest;
-import com.iqtest.bfaespacial.domain.enums.TipoSubtest;
+import com.iqtest.bfaespacial.model.*;
+import com.iqtest.bfaespacial.model.EstadoSubtest;
+import com.iqtest.bfaespacial.model.TipoSubtest;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
@@ -53,3 +53,4 @@ class ResultadosRevisionIT extends AbstractPostgresIT {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Correcta")));
     }
 }
+

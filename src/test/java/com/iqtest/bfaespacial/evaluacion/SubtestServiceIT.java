@@ -2,9 +2,9 @@ package com.iqtest.bfaespacial.evaluacion;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
 import com.iqtest.bfaespacial.common.SubtestCerradoException;
-import com.iqtest.bfaespacial.domain.*;
-import com.iqtest.bfaespacial.domain.enums.TipoSubtest;
-import com.iqtest.bfaespacial.evaluacion.aplicacion.SubtestService;
+import com.iqtest.bfaespacial.model.*;
+import com.iqtest.bfaespacial.model.TipoSubtest;
+import com.iqtest.bfaespacial.service.SubtestService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
@@ -54,3 +54,4 @@ class SubtestServiceIT extends AbstractPostgresIT {
                 .isInstanceOf(SubtestCerradoException.class);
     }
 }
+

@@ -1,10 +1,10 @@
 package com.iqtest.bfaespacial.evaluacion;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
-import com.iqtest.bfaespacial.administracion.catalogo.VersionFormularioRepository;
+import com.iqtest.bfaespacial.repository.VersionFormularioRepository;
 import com.iqtest.bfaespacial.common.IntentoConflictException;
-import com.iqtest.bfaespacial.domain.VersionFormulario;
-import com.iqtest.bfaespacial.evaluacion.gestion.IntentoService;
+import com.iqtest.bfaespacial.model.VersionFormulario;
+import com.iqtest.bfaespacial.service.IntentoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,3 +31,4 @@ class IntentoServiceIT extends AbstractPostgresIT {
                 .isInstanceOf(IntentoConflictException.class);
     }
 }
+

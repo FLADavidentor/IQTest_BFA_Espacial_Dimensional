@@ -1,7 +1,7 @@
 package com.iqtest.bfaespacial.integracion;
 
 import com.iqtest.bfaespacial.AbstractPostgresIT;
-import com.iqtest.bfaespacial.domain.*;
+import com.iqtest.bfaespacial.model.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
