@@ -29,6 +29,11 @@ public class SubtestController {
     public String subtest(Model model) {
         Intento intento = intentoRepo.findByCifAndPeriodoAcademico(sesion.cifActual(), sesion.periodoActual())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Intento no encontrado"));
+        
+        if (intento.getEstado() == com.iqtest.bfaespacial.model.EstadoIntento.COMPLETADO) {
+            return "redirect:/evaluacion/completado";
+        }
+
         VistaActual va = subtestService.vistaActual(intento.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sin subtest en curso"));
 

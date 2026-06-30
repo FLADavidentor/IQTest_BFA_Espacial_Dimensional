@@ -179,8 +179,24 @@ async function main() {
                 await page.screenshot({ path: path.join(artDir, '9_subtest_marcado.png') });
                 console.log("   -> Captura 9 guardada (Burbuja grafito).");
             }
+
+            console.log("11.2. Simulando modo sin conexión (Offline)...");
+            await page.evaluate(() => {
+                window.dispatchEvent(new Event('offline'));
+            });
+            await new Promise(r => setTimeout(r, 500));
+            await page.screenshot({ path: path.join(artDir, '13_modo_sin_conexion.png') });
+            console.log("   -> Captura 13 guardada (Modo Sin Conexión).");
+
+            console.log("11.3. Simulando restablecimiento de conexión (Online)...");
+            await page.evaluate(() => {
+                window.dispatchEvent(new Event('online'));
+            });
+            await new Promise(r => setTimeout(r, 800));
+            await page.screenshot({ path: path.join(artDir, '14_sincronizacion_exitosa.png') });
+            console.log("   -> Captura 14 guardada (Sincronización Exitosa).");
             
-            console.log("11.1. Finalizando subtest S1A para avanzar al siguiente...");
+            console.log("11.4. Finalizando subtest S1A para avanzar al siguiente...");
             await cerrarSubtestViaApi(page);
         }
 

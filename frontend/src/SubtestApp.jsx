@@ -14,6 +14,8 @@ export default function SubtestApp() {
   const [data, setData] = useState(null);
   const [answers, setAnswers] = useState({});
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [syncMessage, setSyncMessage] = useState(null);
 
   const cargar = useCallback(async () => {
     try {
@@ -29,11 +31,38 @@ export default function SubtestApp() {
 
   useEffect(() => { cargar(); }, [cargar]);
 
-  // Flush buffered answers when connectivity returns (RN-BFA-09).
+  // Flush buffered answers and handle connectivity changes (RN-BFA-09).
   useEffect(() => {
-    const onOnline = () => { if (data) flushBuffer(data.ejecucionSubtestId).catch(() => {}); };
-    window.addEventListener('online', onOnline);
-    return () => window.removeEventListener('online', onOnline);
+    const handleOnline = async () => {
+      setIsOnline(true);
+      if (data) {
+        try {
+          const res = await flushBuffer(data.ejecucionSubtestId);
+          if (res && res.sincronizadas > 0) {
+            setSyncMessage(`[ ✓ Conexión restablecida: ${res.sincronizadas} respuesta(s) sincronizada(s) con éxito ]`);
+            setTimeout(() => setSyncMessage(null), 4000);
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Initial check on load
+    if (navigator.onLine && data) {
+      flushBuffer(data.ejecucionSubtestId).catch(() => {});
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, [data]);
 
   // Primary closure signal (P2-A): SSE push the moment the server closes the subtest.
@@ -65,9 +94,14 @@ export default function SubtestApp() {
     setAnswers((a) => ({ ...a, [reactivoId]: opcionId }));
     try {
       await postRespuesta(data.ejecucionSubtestId, reactivoId, opcionId);
+      setIsOnline(true);
     } catch (e) {
-      if (e.status === 409 || e.status === 423) setView('agotado');
-      else bufferAnswer(data.ejecucionSubtestId, reactivoId, opcionId); // offline
+      if (e.status === 409 || e.status === 423) {
+        setView('agotado');
+      } else {
+        bufferAnswer(data.ejecucionSubtestId, reactivoId, opcionId); // offline
+        setIsOnline(false);
+      }
     }
 
     // Auto-advance after a small delay (350ms) to allow OMR lead visual fill feedback
@@ -100,8 +134,21 @@ export default function SubtestApp() {
   }, [answers, data, view, finalizar]);
 
   if (view === 'loading') return <p>Cargando…</p>;
-  if (view === 'completado') return <div className="bfa-completado"><h2>Evaluación completada</h2></div>;
+
+  if (view === 'completado') {
+    return (
+      <div className="bfa-completado">
+        <h2>Evaluación Completada</h2>
+        <p>Has finalizado con éxito los 3 subtests de la evaluación BFA Espacial.</p>
+        <hr style={{ border: 'none', borderTop: '2px dashed #202020', margin: '25px 0' }} />
+        <p style={{ fontWeight: 'bold', textTransform: 'uppercase', color: '#202020' }}>[ Acceso Bloqueado ]</p>
+        <p>Ya has realizado la prueba correspondiente a este período académico. No es posible iniciar un nuevo intento o modificar las respuestas.</p>
+      </div>
+    );
+  }
+
   if (view === 'consigna') return <ConsignaScreen subtestType={data.subtestType} onComenzar={comenzar} />;
+
   if (view === 'agotado') {
     return (
       <div className="bfa-agotado">
@@ -117,6 +164,17 @@ export default function SubtestApp() {
 
   return (
     <div className="bfa-subtest">
+      {!isOnline && (
+        <div className="bfa-offline-banner">
+          [ AVISO: Modo sin conexión. Las respuestas se están guardando localmente en la computadora y se sincronizarán al recuperar la señal. ]
+        </div>
+      )}
+      {syncMessage && (
+        <div className="bfa-sync-banner">
+          {syncMessage}
+        </div>
+      )}
+
       <header>
         <h1>Subtest {data.subtestType}</h1>
         <CountdownTimer seconds={data.tiempoRestanteSeg} onExpire={expirar} />

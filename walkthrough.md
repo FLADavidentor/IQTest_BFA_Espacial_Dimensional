@@ -120,6 +120,17 @@ A continuación se detalla la secuencia de imágenes capturadas durante la ejecu
 
 ---
 
-#### 12. Fin de la Evaluación - Pantalla de Prueba Completada
+#### 12. Fin de la Evaluación - Pantalla de Prueba Completada (Acceso Bloqueado)
 ![12. Evaluación Completada](screenshots/12_subtest_completado.png)
+
+---
+
+#### 13. Fallback: Modo Sin Conexión (Aviso de Red Inactiva en la SPA)
+![13. Modo Sin Conexión](screenshots/13_modo_sin_conexion.png)
+
+---
+
+#### 14. Fallback: Sincronización Exitosa (Notificación de Red Restablecida)
+![14. Sincronización Exitosa](screenshots/14_sincronizacion_exitosa.png)
+
 
