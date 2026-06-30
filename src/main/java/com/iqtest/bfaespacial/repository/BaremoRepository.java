@@ -14,6 +14,9 @@ public interface BaremoRepository extends JpaRepository<Baremo, BaremoId> {
     /** Gap fallback (§13, §19 Q1): nearest lower-or-equal direct score for the factor. */
     Optional<Baremo> findFirstByFactorAndPuntuacionDirectaLessThanEqualOrderByPuntuacionDirectaDesc(
             FactorEspacial factor, Short puntuacionDirecta);
+
+    /** Fallback when score is below the minimum defined direct score. */
+    Optional<Baremo> findFirstByFactorOrderByPuntuacionDirectaAsc(FactorEspacial factor);
 }
 
 

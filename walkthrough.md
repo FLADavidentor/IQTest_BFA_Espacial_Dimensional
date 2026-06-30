@@ -100,11 +100,26 @@ A continuación se detalla la secuencia de imágenes capturadas durante la ejecu
 
 ---
 
-#### 8. Cuadrícula de Preguntas del Subtest (Preguntas e Imágenes Geométricas en B y N)
-![8. Preguntas del Subtest](screenshots/8_subtest_screen.png)
+#### 8. Subtest S1A: Pares de Figuras Bidimensionales (Preguntas e Imágenes Geométricas en B y N)
+![8. Subtest S1A](screenshots/8_subtest_s1a_screen.png)
 
 ---
 
 #### 9. Detalle OMR - Burbuja rellenada con lápiz grafito
 ![9. Respuesta Marcada OMR](screenshots/9_subtest_marcado.png)
+
+---
+
+#### 10. Subtest S2: Figuras Espaciales Desplazadas (Rotación 2D/3D)
+![10. Subtest S2](screenshots/10_subtest_s2_screen.png)
+
+---
+
+#### 11. Subtest S1B: Estructuras Tridimensionales de Cubos (Modelado e Isometría 3D)
+![11. Subtest S1B](screenshots/11_subtest_s1b_screen.png)
+
+---
+
+#### 12. Fin de la Evaluación - Pantalla de Prueba Completada
+![12. Evaluación Completada](screenshots/12_subtest_completado.png)
 

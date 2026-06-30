@@ -1,6 +1,6 @@
 package com.iqtest.bfaespacial.service;
-import com.iqtest.bfaespacial.repository.BaremoRepository;
 
+import com.iqtest.bfaespacial.repository.BaremoRepository;
 import com.iqtest.bfaespacial.model.Baremo;
 import com.iqtest.bfaespacial.model.FactorEspacial;
 import org.springframework.stereotype.Service;
@@ -34,10 +34,15 @@ public class PercentilService {
         // Gap: nearest lower-or-equal score (NEXT_LOWER).
         Baremo floor = baremoRepo
                 .findFirstByFactorAndPuntuacionDirectaLessThanEqualOrderByPuntuacionDirectaDesc(factor, pd)
+                .orElse(null);
+        if (floor != null) {
+            return new PercentilResultado(floor.getPercentil(), true);
+        }
+        // Fallback: If score is below the minimum available, get the lowest direct score entry
+        Baremo lowest = baremoRepo
+                .findFirstByFactorOrderByPuntuacionDirectaAsc(factor)
                 .orElseThrow(() -> new IllegalStateException(
-                        "Sin baremo para factor %s <= %d".formatted(factor, puntuacionDirecta)));
-        return new PercentilResultado(floor.getPercentil(), true);
+                        "No hay baremos para el factor " + factor));
+        return new PercentilResultado(lowest.getPercentil(), true);
     }
 }
-
-

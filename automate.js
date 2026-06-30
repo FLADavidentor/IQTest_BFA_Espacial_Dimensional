@@ -160,42 +160,83 @@ async function main() {
         await page.screenshot({ path: path.join(artDir, '7_estudiante_consignas.png') });
         console.log("   -> Captura 7 guardada (Consignas estilo papel).");
 
-        // Step 8: Click "Comenzar"
-        console.log("10. Comenzando el Subtest...");
-        const startBtn = await page.$('.bfa-consigna button');
+        // ==========================================
+        // SUBTEST S1A
+        // ==========================================
+        console.log("10. Comenzando el Subtest S1A...");
+        let startBtn = await page.$('.bfa-consigna button');
         if (startBtn) {
             await startBtn.click();
-            
-            // Wait explicitly for the reactivo card elements to load
             await page.waitForSelector('.bfa-opciones label input[type=\"radio\"]', { timeout: 12000 });
+            await page.screenshot({ path: path.join(artDir, '8_subtest_s1a_screen.png') });
+            console.log("   -> Captura 8 guardada (S1A: Pareces de Figuras 2D).");
             
-            await page.screenshot({ path: path.join(artDir, '8_subtest_screen.png') });
-            console.log("   -> Captura 8 guardada (Preguntas e imágenes).");
-            
-            // Step 9: Click a radio option to check OMR bubble fill effect
-            console.log("11. Marcando una respuesta (Burbuja OMR)...");
+            console.log("11. Marcando una respuesta en S1A...");
             const radio = await page.$('.bfa-opciones label input[type=\"radio\"]');
             if (radio) {
                 await radio.click();
-                await new Promise(r => setTimeout(r, 800)); // wait for checked animation
+                await new Promise(r => setTimeout(r, 800));
                 await page.screenshot({ path: path.join(artDir, '9_subtest_marcado.png') });
-                console.log("   -> Captura 9 guardada (Burbuja rellenada con lápiz grafito).");
-            } else {
-                console.error("No se encontró ningún radio button en la página del subtest.");
+                console.log("   -> Captura 9 guardada (Burbuja grafito).");
             }
-        } else {
-            console.error("No se encontró el botón de comenzar en .bfa-consigna button");
+            
+            console.log("11.1. Finalizando subtest S1A para avanzar al siguiente...");
+            await cerrarSubtestViaApi(page);
         }
+
+        // ==========================================
+        // SUBTEST S2
+        // ==========================================
+        console.log("12. Cargando subtest S2...");
+        await page.goto('http://localhost:8080/evaluacion/subtest', { waitUntil: 'networkidle2' });
+        await page.waitForSelector('.bfa-consigna button', { timeout: 10000 });
+        startBtn = await page.$('.bfa-consigna button');
+        if (startBtn) {
+            await startBtn.click();
+            await page.waitForSelector('.bfa-opciones label input[type=\"radio\"]', { timeout: 12000 });
+            await page.screenshot({ path: path.join(artDir, '10_subtest_s2_screen.png') });
+            console.log("   -> Captura 10 guardada (S2: Figuras Desplazadas 2D/3D).");
+            
+            console.log("12.1. Finalizando subtest S2 para avanzar al siguiente...");
+            await cerrarSubtestViaApi(page);
+        }
+
+        // ==========================================
+        // SUBTEST S1B
+        // ==========================================
+        console.log("13. Cargando subtest S1B...");
+        await page.goto('http://localhost:8080/evaluacion/subtest', { waitUntil: 'networkidle2' });
+        await page.waitForSelector('.bfa-consigna button', { timeout: 10000 });
+        startBtn = await page.$('.bfa-consigna button');
+        if (startBtn) {
+            await startBtn.click();
+            await page.waitForSelector('.bfa-opciones label input[type=\"radio\"]', { timeout: 12000 });
+            await page.screenshot({ path: path.join(artDir, '11_subtest_s1b_screen.png') });
+            console.log("   -> Captura 11 guardada (S1B: Estructuras de Cubos 3D).");
+            
+            console.log("13.1. Finalizando subtest S1B para terminar la prueba...");
+            await cerrarSubtestViaApi(page);
+        }
+
+        // ==========================================
+        // EVALUACIÓN COMPLETADA
+        // ==========================================
+        console.log("14. Cargando pantalla de completado...");
+        await page.goto('http://localhost:8080/evaluacion/subtest', { waitUntil: 'networkidle2' });
+        await new Promise(r => setTimeout(r, 2000));
+        await page.screenshot({ path: path.join(artDir, '12_subtest_completado.png') });
+        console.log("   -> Captura 12 guardada (Prueba Completada).");
+
         console.log("==================================================");
 
     } catch (e) {
         console.error("Error durante la automatización: ", e);
     } finally {
         await browser.close();
-        console.log("12. Deteniendo servidor Spring Boot...");
+        console.log("15. Deteniendo servidor Spring Boot...");
         server.kill();
         
-        console.log("13. Deteniendo base de datos PostgreSQL...");
+        console.log("16. Deteniendo base de datos PostgreSQL...");
         const stop = spawn('C:\\Users\\devuser\\pgsql\\bin\\pg_ctl.exe', [
             '-D', 'C:\\Users\\devuser\\pgsql\\data',
             'stop'
@@ -204,6 +245,21 @@ async function main() {
         
         process.exit(0);
     }
+}
+
+async function cerrarSubtestViaApi(page) {
+    await page.evaluate(async () => {
+        const getCsrfToken = () => {
+            const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'));
+            return match ? decodeURIComponent(match[2]) : '';
+        };
+        await fetch('/api/subtest/cerrar', {
+            method: 'POST',
+            headers: { 'X-XSRF-TOKEN': getCsrfToken() }
+        });
+    });
+    // Wait for state to synchronize
+    await new Promise(r => setTimeout(r, 1000));
 }
 
 async function browserLaunch() {
@@ -218,13 +274,21 @@ async function browserLaunch() {
             return await puppeteer.launch({
                 headless: "new",
                 executablePath: p,
-                defaultViewport: { width: 1024, height: 768 }
+                defaultViewport: { width: 1024, height: 768 },
+                args: [
+                    '--disable-lazy-image-loading',
+                    '--blink-settings=lazyImageLoadingEnabled=false'
+                ]
             });
         }
     }
     return await puppeteer.launch({
         headless: "new",
-        defaultViewport: { width: 1024, height: 768 }
+        defaultViewport: { width: 1024, height: 768 },
+        args: [
+            '--disable-lazy-image-loading',
+            '--blink-settings=lazyImageLoadingEnabled=false'
+        ]
     });
 }
 
