@@ -59,26 +59,52 @@ Hemos implementado el script **[automate.js](file:///f:/Dev/Repos/IQTest_BFA_Esp
 
 ---
 
-## Evidencia Visual de los Pasos (Carrusel)
+### Evidencia Visual de los Pasos
 
-A continuación se muestra la secuencia capturada en tiempo de ejecución:
+A continuación se detalla la secuencia de imágenes capturadas durante la ejecución del flujo de prueba automatizado:
 
-````carousel
-![1. Pantalla de Login (Monospace / Estilo papel fotocopiado)](screenshots/1_login_screen.png)
-<!-- slide -->
-![2. Panel de Administración de Reactivos (Sesión Administrador)](screenshots/2_admin_reactivos.png)
-<!-- slide -->
-![3. Panel de Configuración de Baremos y Percentiles](screenshots/3_admin_baremos.png)
-<!-- slide -->
-![4. ABM y Control de Usuarios (Estilo Premium Glassmorphic)](screenshots/4_admin_usuarios.png)
-<!-- slide -->
-![5. Dashboard de Inicio del Estudiante (Inicio de Evaluación)](screenshots/5_estudiante_dashboard.png)
-<!-- slide -->
-![6. RBAC Check - 403 Forbidden al Estudiante intentando acceder a Admin](screenshots/6_rbac_denied_check.png)
-<!-- slide -->
-![7. Consignas e Instrucciones del Subtest S1A](screenshots/7_estudiante_consignas.png)
-<!-- slide -->
-![8. Cuadrícula de Preguntas del Subtest (Preguntas e Imágenes Geométricas en B y N)](screenshots/8_subtest_screen.png)
-<!-- slide -->
-![9. Detalle OMR - Burbuja rellenada con lápiz grafito](screenshots/9_subtest_marcado.png)
-````
+---
+
+#### 1. Pantalla de Login (Monospace / Estilo papel fotocopiado)
+![1. Pantalla de Login](screenshots/1_login_screen.png)
+
+---
+
+#### 2. Panel de Administración de Reactivos (Sesión Administrador)
+![2. Panel de Administración de Reactivos](screenshots/2_admin_reactivos.png)
+
+---
+
+#### 3. Panel de Configuración de Baremos y Percentiles (Sesión Administrador)
+![3. Panel de Configuración de Baremos](screenshots/3_admin_baremos.png)
+
+---
+
+#### 4. ABM y Control de Usuarios (Estilo Premium Glassmorphic)
+![4. Gestión de Usuarios](screenshots/4_admin_usuarios.png)
+
+---
+
+#### 5. Dashboard de Inicio del Estudiante (Inicio de Evaluación)
+![5. Dashboard Estudiante](screenshots/5_estudiante_dashboard.png)
+
+---
+
+#### 6. RBAC Check - HTTP 403 Forbidden al Estudiante intentando acceder a Admin
+![6. RBAC Check 403](screenshots/6_rbac_denied_check.png)
+
+---
+
+#### 7. Consignas e Instrucciones del Subtest S1A
+![7. Consignas del Subtest](screenshots/7_estudiante_consignas.png)
+
+---
+
+#### 8. Cuadrícula de Preguntas del Subtest (Preguntas e Imágenes Geométricas en B y N)
+![8. Preguntas del Subtest](screenshots/8_subtest_screen.png)
+
+---
+
+#### 9. Detalle OMR - Burbuja rellenada con lápiz grafito
+![9. Respuesta Marcada OMR](screenshots/9_subtest_marcado.png)
+
