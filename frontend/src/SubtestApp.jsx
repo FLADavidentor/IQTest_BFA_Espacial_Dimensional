@@ -13,12 +13,14 @@ export default function SubtestApp() {
   const [view, setView] = useState('loading');
   const [data, setData] = useState(null);
   const [answers, setAnswers] = useState({});
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const cargar = useCallback(async () => {
     try {
       const d = await getCurrent();
       setData(d);
       setAnswers({});
+      setCurrentIndex(0);
       setView(d.estado === 'EN_CURSO' ? 'test' : 'consigna'); // PENDIENTE -> consigna
     } catch (e) {
       if (e.status === 404) setView('completado'); // no active subtest left
@@ -67,6 +69,13 @@ export default function SubtestApp() {
       if (e.status === 409 || e.status === 423) setView('agotado');
       else bufferAnswer(data.ejecucionSubtestId, reactivoId, opcionId); // offline
     }
+
+    // Auto-advance after a small delay (350ms) to allow OMR lead visual fill feedback
+    if (data && data.items && currentIndex < data.items.length - 1) {
+      setTimeout(() => {
+        setCurrentIndex((prev) => prev + 1);
+      }, 350);
+    }
   };
 
   const expirar = useCallback(async () => {
@@ -104,6 +113,8 @@ export default function SubtestApp() {
   }
 
   // view === 'test'
+  const currentItem = data && data.items && data.items.length > 0 ? data.items[currentIndex] : null;
+
   return (
     <div className="bfa-subtest">
       <header>
@@ -111,9 +122,36 @@ export default function SubtestApp() {
         <CountdownTimer seconds={data.tiempoRestanteSeg} onExpire={expirar} />
         <ProgressBar answers={answers} items={data.items} />
       </header>
-      {data.items.map((item) => (
-        <ReactivoCard key={item.id} item={item} selected={answers[item.id]} onSelect={seleccionar} />
-      ))}
+
+      {currentItem && (
+        <ReactivoCard
+          item={currentItem}
+          selected={answers[currentItem.id]}
+          onSelect={seleccionar}
+        />
+      )}
+
+      {data && data.items && data.items.length > 0 && (
+        <div className="bfa-navegacion">
+          <button
+            type="button"
+            onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+            disabled={currentIndex === 0}
+          >
+            ← Anterior
+          </button>
+          <span className="bfa-progreso-texto">
+            Ítem {currentIndex + 1} de {data.items.length}
+          </span>
+          <button
+            type="button"
+            onClick={() => setCurrentIndex((i) => Math.min(data.items.length - 1, i + 1))}
+            disabled={currentIndex === data.items.length - 1}
+          >
+            Siguiente →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

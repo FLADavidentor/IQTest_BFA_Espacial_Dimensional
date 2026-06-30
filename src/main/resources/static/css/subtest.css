@@ -249,3 +249,43 @@ body {
   background-color: #faf8f3;
   color: #202020;
 }
+
+/* Pagination Navigation for clean single-item layout */
+.bfa-navegacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 25px;
+  border-top: 2px dashed #b5b2a9;
+  padding-top: 20px;
+}
+
+.bfa-navegacion button {
+  background-color: #202020;
+  color: #faf8f3;
+  border: 2px solid #202020;
+  padding: 8px 22px;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.bfa-navegacion button:hover:not(:disabled) {
+  background-color: #faf8f3;
+  color: #202020;
+}
+
+.bfa-navegacion button:disabled {
+  border-color: #cbd5e1;
+  background-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.bfa-progreso-texto {
+  font-weight: bold;
+  font-size: 1.05rem;
+}
+
