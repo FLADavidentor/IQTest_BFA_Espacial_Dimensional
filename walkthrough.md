@@ -64,21 +64,21 @@ Hemos implementado el script **[automate.js](file:///f:/Dev/Repos/IQTest_BFA_Esp
 A continuación se muestra la secuencia capturada en tiempo de ejecución:
 
 ````carousel
-![1. Pantalla de Login (Monospace / Estilo papel fotocopiado)](file:///f:/Dev/Repos/IQTest_BFA_Espacial_Dimensional/screenshots/1_login_screen.png)
+![1. Pantalla de Login (Monospace / Estilo papel fotocopiado)](screenshots/1_login_screen.png)
 <!-- slide -->
-![2. Panel de Administración de Reactivos (Sesión Administrador)](file:///f:/Dev/Repos/IQTest_BFA_Espacial_Dimensional/screenshots/2_admin_reactivos.png)
+![2. Panel de Administración de Reactivos (Sesión Administrador)](screenshots/2_admin_reactivos.png)
 <!-- slide -->
-![3. Panel de Configuración de Baremos y Percentiles](file:///f:/Dev/Repos/IQTest_BFA_Espacial_Dimensional/screenshots/3_admin_baremos.png)
+![3. Panel de Configuración de Baremos y Percentiles](screenshots/3_admin_baremos.png)
 <!-- slide -->
-![4. ABM y Control de Usuarios (Estilo Premium Glassmorphic)](file:///f:/Dev/Repos/IQTest_BFA_Espacial_Dimensional/screenshots/4_admin_usuarios.png)
+![4. ABM y Control de Usuarios (Estilo Premium Glassmorphic)](screenshots/4_admin_usuarios.png)
 <!-- slide -->
-![5. Dashboard de Inicio del Estudiante (Inicio de Evaluación)](file:///f:/Dev/Repos/IQTest_BFA_Espacial_Dimensional/screenshots/5_estudiante_dashboard.png)
+![5. Dashboard de Inicio del Estudiante (Inicio de Evaluación)](screenshots/5_estudiante_dashboard.png)
 <!-- slide -->
-![6. RBAC Check - 403 Forbidden al Estudiante intentando acceder a Admin](file:///f:/Dev/Repos/IQTest_BFA_Espacial_Dimensional/screenshots/6_rbac_denied_check.png)
+![6. RBAC Check - 403 Forbidden al Estudiante intentando acceder a Admin](screenshots/6_rbac_denied_check.png)
 <!-- slide -->
-![7. Consignas e Instrucciones del Subtest S1A](file:///f:/Dev/Repos/IQTest_BFA_Espacial_Dimensional/screenshots/7_estudiante_consignas.png)
+![7. Consignas e Instrucciones del Subtest S1A](screenshots/7_estudiante_consignas.png)
 <!-- slide -->
-![8. Cuadrícula de Preguntas del Subtest (Preguntas e Imágenes Geométricas en B y N)](file:///f:/Dev/Repos/IQTest_BFA_Espacial_Dimensional/screenshots/8_subtest_screen.png)
+![8. Cuadrícula de Preguntas del Subtest (Preguntas e Imágenes Geométricas en B y N)](screenshots/8_subtest_screen.png)
 <!-- slide -->
-![9. Detalle OMR - Burbuja rellenada con lápiz grafito](file:///f:/Dev/Repos/IQTest_BFA_Espacial_Dimensional/screenshots/9_subtest_marcado.png)
+![9. Detalle OMR - Burbuja rellenada con lápiz grafito](screenshots/9_subtest_marcado.png)
 ````
