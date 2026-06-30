@@ -4,6 +4,7 @@ import com.iqtest.bfaespacial.service.AuditoriaService;
 import com.iqtest.bfaespacial.common.IntentoListoParaCalificarEvent;
 import com.iqtest.bfaespacial.model.Intento;
 import com.iqtest.bfaespacial.model.Resultado;
+import com.iqtest.bfaespacial.model.Respuesta;
 import com.iqtest.bfaespacial.model.EstadoIntento;
 import com.iqtest.bfaespacial.model.FactorEspacial;
 import com.iqtest.bfaespacial.model.TipoSubtest;
@@ -77,6 +78,7 @@ public class CalificacionService {
         r.setPercS1(pS1.percentil());
         r.setPercS2(pS2.percentil());
         r.setPercSt(pSt.percentil());
+        r.setAlertaConsistencia(analizarConsistencia(intentoId));
         // Resultado has a manually-assigned @Id, so save() merges; use the returned managed instance.
         Resultado saved = resultadoRepo.save(r);
         em.flush();
@@ -86,10 +88,68 @@ public class CalificacionService {
         intento.setFechaFin(OffsetDateTime.now());
 
         auditoria.registrar(intentoId, intento.getCif(), "RESULTADO_CALCULADO",
-                "pd_s1a=%d pd_s1b=%d pd_s2=%d perc_st=%d".formatted(pdS1a, pdS1b, pdS2, pSt.percentil()));
+                "pd_s1a=%d pd_s1b=%d pd_s2=%d perc_st=%d alerta=%s"
+                        .formatted(pdS1a, pdS1b, pdS2, pSt.percentil(), r.getAlertaConsistencia()));
         long ms = (System.nanoTime() - t0) / 1_000_000;
         log.info("RESULTADO_CALCULADO intento={} en {}ms (NFR RN-BFA-06 < 3000)", intentoId, ms);
         return saved;
+    }
+
+    String analizarConsistencia(Long intentoId) {
+        java.util.List<Respuesta> respuestas = respuestaRepo.findByEjecucionSubtestIntentoId(intentoId);
+        if (respuestas.isEmpty()) {
+            return null;
+        }
+
+        // Group by subtest type, only checking answered questions
+        java.util.Map<TipoSubtest, java.util.List<Respuesta>> agrupado = respuestas.stream()
+                .filter(r -> r.getOpcionReactivo() != null)
+                .collect(java.util.stream.Collectors.groupingBy(r -> r.getEjecucionSubtest().getTipoSubtest()));
+
+        for (java.util.Map.Entry<TipoSubtest, java.util.List<Respuesta>> entry : agrupado.entrySet()) {
+            TipoSubtest subtest = entry.getKey();
+            java.util.List<Respuesta> subResp = entry.getValue();
+            if (subResp.size() < 10) continue; // skip if too few responses to avoid false positives
+
+            // 1. Repetition check: count occurrences of each option label (A, B, C, D, E)
+            java.util.Map<String, Long> freq = subResp.stream()
+                    .collect(java.util.stream.Collectors.groupingBy(r -> r.getOpcionReactivo().getEtiqueta(), java.util.stream.Collectors.counting()));
+
+            long maxCount = freq.values().stream().max(Long::compare).orElse(0L);
+            double pct = (double) maxCount / subResp.size();
+
+            // If same option selected in > 85% of answers for this subtest
+            if (pct > 0.85) {
+                String option = freq.entrySet().stream()
+                        .filter(e -> e.getValue() == maxCount)
+                        .map(java.util.Map.Entry::getKey)
+                        .findFirst().orElse("");
+                return "Alta repetición: " + subtest.name() + " (" + Math.round(pct * 100) + "% '" + option + "')";
+            }
+
+            // 2. Consecutive identical answers check (>= 12 identical in a row)
+            subResp.sort(java.util.Comparator.comparing(r -> r.getReactivo().getOrden()));
+            int maxConsecutive = 0;
+            int currentConsecutive = 0;
+            String lastLabel = "";
+            for (Respuesta r : subResp) {
+                String label = r.getOpcionReactivo().getEtiqueta();
+                if (label.equals(lastLabel)) {
+                    currentConsecutive++;
+                } else {
+                    currentConsecutive = 1;
+                    lastLabel = label;
+                }
+                if (currentConsecutive > maxConsecutive) {
+                    maxConsecutive = currentConsecutive;
+                }
+            }
+
+            if (maxConsecutive >= 12) {
+                return "Patrón consecutivo: " + subtest.name() + " (" + maxConsecutive + " '" + lastLabel + "' seguidos)";
+            }
+        }
+        return null;
     }
 
     private void logGap(Long intentoId, String cif, FactorEspacial factor, short score, PercentilResultado pr) {

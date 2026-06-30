@@ -1,0 +1,251 @@
+/* Aged photocopy paper and vintage print aesthetic for the BFA test */
+
+body {
+  background-color: #e5e2d9; /* Darker grey-yellow photocopy board background */
+  background-image: 
+    radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 0),
+    radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 0);
+  background-size: 12px 12px;
+  background-position: 0 0, 6px 6px;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Container simulating a printed paper page */
+.bfa-subtest {
+  background: #faf8f3; /* Warm off-white paper sheet */
+  border: 1px solid #b5b2a9;
+  border-bottom: 2px solid #9e9b92;
+  box-shadow: 
+    0 1px 3px rgba(0,0,0,0.05), 
+    0 10px 25px rgba(0,0,0,0.08);
+  border-radius: 1px;
+  padding: 40px 50px;
+  width: 100%;
+  max-width: 800px;
+  box-sizing: border-box;
+  font-family: "Courier New", Courier, monospace;
+  color: #202020;
+}
+
+/* Header styled like an official printed test document */
+.bfa-subtest header {
+  border-bottom: 3px double #202020;
+  padding-bottom: 20px;
+  margin-bottom: 35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.bfa-subtest header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0 0 10px 0;
+  letter-spacing: 0.05em;
+}
+
+/* Countdown Timer styled like an official stopwatch display */
+.bfa-subtest header .bfa-timer {
+  font-size: 1.3rem;
+  font-weight: bold;
+  border: 2px solid #202020;
+  padding: 6px 16px;
+  background-color: #f1ebd9;
+  margin-bottom: 15px;
+  display: inline-block;
+}
+
+/* Progress bar styled as a typewriter-based block indicator */
+.bfa-subtest .bfa-progress {
+  width: 100%;
+  max-width: 500px;
+  height: 10px;
+  background-color: #e5e2d9;
+  border: 2px solid #202020;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.bfa-subtest .bfa-progress-fill {
+  height: 100%;
+  background-color: #202020; /* Solid ink fill */
+  transition: width 0.2s ease-out;
+}
+
+/* Reactivo card styled like a question box in a printed exam booklet */
+.bfa-reactivo {
+  border: 2px solid #202020;
+  border-radius: 0;
+  padding: 25px;
+  margin-bottom: 35px;
+  background-color: #fbfbfa;
+  box-sizing: border-box;
+}
+
+.bfa-reactivo legend {
+  font-size: 1.1rem;
+  font-weight: bold;
+  padding: 0 10px;
+  text-transform: uppercase;
+  background-color: #faf8f3;
+}
+
+/* Center and style the photocopy reactivo images */
+.bfa-reactivo img {
+  display: block;
+  margin: 0 auto 20px auto;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #d3d1c9;
+  mix-blend-mode: multiply; /* Blends drawing background into the card */
+}
+
+.bfa-img-fallback {
+  text-align: center;
+  padding: 40px;
+  border: 2px dashed #b5b2a9;
+  color: #7b7870;
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+.bfa-enunciado {
+  font-size: 1rem;
+  line-height: 1.4;
+  margin: 0 0 20px 0;
+  border-left: 3px solid #202020;
+  padding-left: 12px;
+}
+
+/* Style the bubbles option grid */
+.bfa-opciones {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 15px;
+  border-top: 1px dashed #b5b2a9;
+  padding-top: 15px;
+}
+
+/* OMR Bubble labels */
+.bfa-opciones label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+  user-select: none;
+  padding: 4px 8px;
+  transition: background-color 0.1s;
+}
+
+/* Custom OMR bubble replacing standard radio */
+.bfa-opciones input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  border: 2px solid #202020;
+  border-radius: 50%;
+  outline: none;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: #faf8f3;
+  transition: border-color 0.15s;
+}
+
+/* When selected, fill the bubble with graphite black */
+.bfa-opciones input[type="radio"]:checked::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background-color: #202020;
+  border-radius: 50%;
+  display: block;
+}
+
+/* Loading/Timeout/Completed states styled in typewriter look */
+.bfa-agotado, .bfa-completado {
+  background: #faf8f3;
+  border: 2px solid #202020;
+  padding: 40px;
+  max-width: 500px;
+  margin: 80px auto;
+  text-align: center;
+  font-family: "Courier New", Courier, monospace;
+  color: #202020;
+}
+
+.bfa-agotado h2, .bfa-completado h2 {
+  text-transform: uppercase;
+  margin-top: 0;
+}
+
+.bfa-agotado button {
+  background-color: #202020;
+  color: #faf8f3;
+  border: 2px solid #202020;
+  padding: 10px 24px;
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.1s;
+  margin-top: 15px;
+}
+
+.bfa-agotado button:hover {
+  background-color: #faf8f3;
+  color: #202020;
+}
+
+/* Consignas Screen (Instructions) styling */
+.bfa-consignas {
+  background: #faf8f3;
+  border: 2px solid #202020;
+  padding: 40px;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.bfa-consignas h2 {
+  text-transform: uppercase;
+  border-bottom: 2px solid #202020;
+  padding-bottom: 8px;
+  margin-top: 0;
+}
+
+.bfa-consignas p {
+  line-height: 1.5;
+}
+
+.bfa-consignas button {
+  background-color: #202020;
+  color: #faf8f3;
+  border: 2px solid #202020;
+  padding: 12px 28px;
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: background 0.1s;
+  display: block;
+  margin: 30px auto 0 auto;
+}
+
+.bfa-consignas button:hover {
+  background-color: #faf8f3;
+  color: #202020;
+}

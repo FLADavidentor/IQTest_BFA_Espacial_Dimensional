@@ -1,56 +1,323 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Admin · Reactivos</title></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Gestión de Reactivos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .user-bar {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .user-info strong {
+      color: var(--text-main);
+    }
+    .logout-btn {
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .logout-btn:hover {
+      opacity: 0.9;
+    }
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+    h1, h2 {
+      font-family: 'Outfit', sans-serif;
+      margin-top: 0;
+    }
+    .admin-nav {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      background: var(--card-bg);
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+    .admin-nav a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .admin-nav a:hover, .admin-nav a.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .form-row .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    textarea {
+      resize: vertical;
+      height: 80px;
+    }
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-danger-link {
+      background: none;
+      border: none;
+      color: var(--danger-color);
+      padding: 0;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .btn-danger-link:hover {
+      color: #f87171;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    td {
+      font-size: 0.95rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge-success {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: var(--success-color);
+    }
+    .badge-danger {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: var(--danger-color);
+    }
+    .badge-info {
+      background-color: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+    }
+    .action-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      margin-right: 15px;
+      font-size: 0.9rem;
+    }
+    .action-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
 <body>
-  <div style="background-color: #f1f5f9; padding: 10px 20px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center;" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-    <div>
+  <!-- Session Header -->
+  <div class="user-bar" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div class="user-info">
       <strong>Usuario:</strong> <span sec:authentication="name">User</span> | 
-      <strong>Rol actual:</strong> <span sec:authentication="principal.authorities">Rol</span>
+      <strong>Rol:</strong> <span sec:authentication="principal.authorities">Rol</span>
     </div>
     <form th:action="@{/logout}" method="post" style="margin: 0;">
-      <button type="submit" style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
+      <button type="submit" class="logout-btn">Cerrar Sesión</button>
     </form>
   </div>
-  <h1>Reactivos</h1>
-  <p><a th:href="@{/admin/imagenes}">Subir imagen</a></p>
 
-  <h2 th:text="${form.id} == null ? 'Nuevo reactivo' : 'Editar reactivo'">Nuevo</h2>
-  <form th:action="@{/admin/reactivos}" th:object="${form}" method="post">
-    <input type="hidden" th:field="*{id}">
-    <label>Versión:
-      <select th:field="*{versionFormularioId}">
-        <option th:each="v : ${versiones}" th:value="${v.id}"
-                th:text="${v.anio} + ' v' + ${v.numeroVersion}">v</option>
-      </select>
-    </label><br>
-    <label>Subtest:
-      <select th:field="*{tipoSubtest}">
-        <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}">t</option>
-      </select>
-    </label><br>
-    <label>Orden: <input type="number" th:field="*{orden}"></label><br>
-    <label>Imagen URL: <input type="text" th:field="*{enunciadoImagenUrl}" size="40"></label><br>
-    <label>Texto (opcional): <textarea th:field="*{enunciadoTexto}"></textarea></label><br>
-    <button type="submit">Guardar</button>
-  </form>
+  <div class="container">
+    <h1>Panel de Administración</h1>
 
-  <h2>Listado</h2>
-  <table border="1">
-    <tr><th>ID</th><th>Subtest</th><th>Orden</th><th>Imagen</th><th>Activo</th><th></th></tr>
-    <tr th:each="r : ${reactivos}">
-      <td th:text="${r.id}">—</td>
-      <td th:text="${r.tipoSubtest}">—</td>
-      <td th:text="${r.orden}">—</td>
-      <td th:text="${r.enunciadoImagenUrl}">—</td>
-      <td th:text="${r.activo} ? 'Sí' : 'No'">—</td>
-      <td>
-        <a th:href="@{|/admin/reactivos/${r.id}/editar|}">Editar</a>
-        <a th:href="@{|/admin/reactivos/${r.id}/opciones|}">Opciones</a>
-        <form th:action="@{|/admin/reactivos/${r.id}/eliminar|}" method="post" style="display:inline">
-          <button type="submit">Eliminar</button>
-        </form>
-      </td>
-    </tr>
-  </table>
+    <!-- Admin Top Nav Bar -->
+    <div class="admin-nav">
+      <a th:href="@{/admin/reactivos}" class="active">Reactivos</a>
+      <a th:href="@{/admin/versiones}">Versiones</a>
+      <a th:href="@{/admin/imagenes}">Subir Imágenes</a>
+      <a th:href="@{/admin/baremos}">Baremos</a>
+      <a th:href="@{/admin/usuarios}">Usuarios</a>
+      <a th:href="@{/resultados}">Historial de Resultados</a>
+    </div>
+
+    <!-- Formulario Reactivo -->
+    <div class="card">
+      <h2 th:text="${form.id} == null ? 'Nuevo Reactivo' : 'Editar Reactivo'">Nuevo Reactivo</h2>
+      <form th:action="@{/admin/reactivos}" th:object="${form}" method="post">
+        <input type="hidden" th:field="*{id}">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="versionFormularioId">Versión de Formulario</label>
+            <select th:field="*{versionFormularioId}">
+              <option th:each="v : ${versiones}" th:value="${v.id}"
+                      th:text="${v.anio} + ' v' + ${v.numeroVersion}">v</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="tipoSubtest">Subtest BFA</label>
+            <select th:field="*{tipoSubtest}">
+              <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}">t</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="orden">Orden / N° Ítem</label>
+            <input type="number" th:field="*{orden}" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="enunciadoImagenUrl">Imagen URL</label>
+          <input type="text" th:field="*{enunciadoImagenUrl}" placeholder="ej: /img/s1a/reactivo_1.png" required>
+        </div>
+        <div class="form-group">
+          <label for="enunciadoTexto">Texto del Enunciado (Opcional)</label>
+          <textarea th:field="*{enunciadoTexto}" placeholder="Texto opcional a mostrar con la imagen..."></textarea>
+        </div>
+        <button type="submit" class="btn-primary">Guardar Reactivo</button>
+      </form>
+    </div>
+
+    <!-- Listado Reactivos -->
+    <div class="card" style="padding-top: 15px;">
+      <h2>Listado General</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Subtest</th>
+            <th>Orden</th>
+            <th>Imagen</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="r : ${reactivos}">
+            <td th:text="${r.id}" style="color: var(--text-muted);">1</td>
+            <td>
+              <span th:text="${r.tipoSubtest}" class="badge badge-info">S1A</span>
+            </td>
+            <td th:text="${r.orden}" style="font-weight: 500;">1</td>
+            <td th:text="${r.enunciadoImagenUrl}" style="font-family: monospace; font-size: 0.85rem;">/img/s1a/...</td>
+            <td>
+              <span th:if="${r.activo}" class="badge badge-success">Activo</span>
+              <span th:unless="${r.activo}" class="badge badge-danger">Inactivo</span>
+            </td>
+            <td>
+              <a th:href="@{|/admin/reactivos/${r.id}/editar|}" class="action-link">Editar</a>
+              <a th:href="@{|/admin/reactivos/${r.id}/opciones|}" class="action-link">Opciones</a>
+              <form th:action="@{|/admin/reactivos/${r.id}/eliminar|}" method="post" style="display:inline">
+                <button type="submit" class="btn-danger-link" onclick="return confirm('¿Seguro que desea desactivar este reactivo?')">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </body>
 </html>

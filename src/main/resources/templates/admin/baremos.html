@@ -1,31 +1,273 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Admin · Baremos</title></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Gestión de Baremos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .user-bar {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .user-info strong {
+      color: var(--text-main);
+    }
+    .logout-btn {
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .logout-btn:hover {
+      opacity: 0.9;
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+    h1, h2 {
+      font-family: 'Outfit', sans-serif;
+      margin-top: 0;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .back-btn {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+    .back-btn:hover {
+      color: var(--primary-color);
+    }
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      margin-bottom: 30px;
+    }
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+    .alert-success {
+      background-color: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--success-color);
+      color: #34d399;
+    }
+    .alert-danger {
+      background-color: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--danger-color);
+      color: #f87171;
+    }
+    .upload-form {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .file-input-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 250px;
+    }
+    input[type="file"] {
+      padding: 10px;
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.4);
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, opacity 0.2s;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-save {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-save:hover {
+      background-color: var(--primary-hover);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    td {
+      font-size: 0.95rem;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 6px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      margin-right: 10px;
+    }
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background-color: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+    }
+  </style>
+</head>
 <body>
-  <div style="background-color: #f1f5f9; padding: 10px 20px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center;" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-    <div>
+  <!-- Session Header -->
+  <div class="user-bar" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div class="user-info">
       <strong>Usuario:</strong> <span sec:authentication="name">User</span> | 
-      <strong>Rol actual:</strong> <span sec:authentication="principal.authorities">Rol</span>
+      <strong>Rol:</strong> <span sec:authentication="principal.authorities">Rol</span>
     </div>
     <form th:action="@{/logout}" method="post" style="margin: 0;">
-      <button type="submit" style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
+      <button type="submit" class="logout-btn">Cerrar Sesión</button>
     </form>
   </div>
-  <h1>Baremo</h1>
-  <table border="1">
-    <tr><th>Factor</th><th>Puntuación directa</th><th>Percentil (editar)</th></tr>
-    <tr th:each="b : ${baremos}">
-      <td th:text="${b.factor}">—</td>
-      <td th:text="${b.puntuacionDirecta}">—</td>
-      <td>
-        <form th:action="@{/admin/baremos}" method="post" style="display:inline">
-          <input type="hidden" name="factor" th:value="${b.factor}">
-          <input type="hidden" name="puntuacionDirecta" th:value="${b.puntuacionDirecta}">
-          <input type="number" name="percentil" th:value="${b.percentil}">
-          <button type="submit">Guardar</button>
-        </form>
-      </td>
-    </tr>
-  </table>
+
+  <div class="container">
+    <div class="header-nav">
+      <h1>Tabla de Baremos (Normas 1992)</h1>
+      <a th:href="@{/admin/reactivos}" class="back-btn">← Volver al Panel</a>
+    </div>
+
+    <!-- Alert banners -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}">Operación exitosa</div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}">Hubo un error</div>
+
+    <!-- Carga Masiva CSV -->
+    <div class="card">
+      <h2>Carga Masiva (Archivo CSV)</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+        Suba un archivo CSV para reemplazar toda la tabla de baremos. Formato esperado: <code>factor,puntuacion_directa,percentil</code>.
+      </p>
+      <form th:action="@{/admin/baremos/upload}" method="post" enctype="multipart/form-data" class="upload-form">
+        <div class="file-input-wrapper">
+          <input type="file" name="file" accept=".csv" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Importar CSV</button>
+      </form>
+    </div>
+
+    <!-- Tabla de Baremos -->
+    <div class="card" style="padding-top: 15px;">
+      <h2>Listado y Edición Celda por Celda</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Factor</th>
+            <th>Puntuación Directa</th>
+            <th>Percentil</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="b : ${baremos}">
+            <td>
+              <span th:text="${b.factor}" class="badge">S1</span>
+            </td>
+            <td th:text="${b.puntuacionDirecta}" style="font-weight: 500;">0</td>
+            <td>
+              <form th:action="@{/admin/baremos}" method="post" style="display:flex; align-items:center;">
+                <input type="hidden" name="factor" th:value="${b.factor}">
+                <input type="hidden" name="puntuacionDirecta" th:value="${b.puntuacionDirecta}">
+                <input type="number" name="percentil" th:value="${b.percentil}" min="1" max="100" required>
+                <button type="submit" class="btn-save">Guardar</button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </body>
 </html>

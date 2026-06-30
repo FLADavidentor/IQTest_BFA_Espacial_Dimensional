@@ -2,26 +2,246 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Admin · Subir imagen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Subir Imagen</title>
   <meta name="_csrf" th:content="${_csrf.token}">
   <meta name="_csrf_header" th:content="${_csrf.headerName}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .user-bar {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .user-info strong {
+      color: var(--text-main);
+    }
+    .logout-btn {
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .logout-btn:hover {
+      opacity: 0.9;
+    }
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+    h1, h2 {
+      font-family: 'Outfit', sans-serif;
+      margin-top: 0;
+    }
+    .admin-nav {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      background: var(--card-bg);
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+    .admin-nav a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .admin-nav a:hover, .admin-nav a.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .form-row .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+    }
+    input[type="file"] {
+      padding: 10px;
+      border: 1px dashed var(--border-color);
+      background: rgba(15, 23, 42, 0.4);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    #resultado {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--border-color);
+      display: none;
+      align-items: center;
+      gap: 20px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    code {
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 6px 12px;
+      border-radius: 6px;
+      color: #60a5fa;
+      font-family: monospace;
+      font-size: 0.95rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      word-break: break-all;
+    }
+    .preview-img {
+      max-height: 120px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+  </style>
 </head>
 <body>
-  <h1>Subir imagen de reactivo</h1>
-  <p>PNG, JPEG o WEBP · máx 2MB. Copia la URL resultante en el campo "Imagen URL" del reactivo.</p>
+  <!-- Session Header -->
+  <div class="user-bar" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div class="user-info">
+      <strong>Usuario:</strong> <span sec:authentication="name">User</span> | 
+      <strong>Rol:</strong> <span sec:authentication="principal.authorities">Rol</span>
+    </div>
+    <form th:action="@{/logout}" method="post" style="margin: 0;">
+      <button type="submit" class="logout-btn">Cerrar Sesión</button>
+    </form>
+  </div>
 
-  <form id="form-upload">
-    <label>Subtest:
-      <select name="tipoSubtest">
-        <option value="">(ninguno)</option>
-        <option th:each="s : ${subdirs}" th:value="${s}" th:text="${s}">s1a</option>
-      </select>
-    </label>
-    <label>Archivo: <input type="file" name="file" accept="image/png,image/jpeg,image/webp" required></label>
-    <button type="submit">Subir</button>
-  </form>
+  <div class="container">
+    <h1>Panel de Administración</h1>
 
-  <p id="resultado"></p>
+    <!-- Admin Top Nav Bar -->
+    <div class="admin-nav">
+      <a th:href="@{/admin/reactivos}">Reactivos</a>
+      <a th:href="@{/admin/versiones}">Versiones</a>
+      <a th:href="@{/admin/imagenes}" class="active">Subir Imágenes</a>
+      <a th:href="@{/admin/baremos}">Baremos</a>
+      <a th:href="@{/admin/usuarios}">Usuarios</a>
+      <a th:href="@{/resultados}">Historial de Resultados</a>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="card">
+      <h2>Subir Imagen de Reactivo</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+        Formatos permitidos: PNG, JPEG, WEBP. Tamaño máximo: 2MB. Tras la subida, se generará una URL relativa para copiar en la configuración del reactivo.
+      </p>
+      <form id="form-upload">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tipoSubtest">Subcarpeta de Subtest (Opcional)</label>
+            <select id="tipoSubtest" name="tipoSubtest">
+              <option value="">(Ninguna - Carpeta Raíz)</option>
+              <option th:each="s : ${subdirs}" th:value="${s}" th:text="${s.toUpperCase()}">s1a</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="file">Seleccionar Archivo</label>
+            <input type="file" id="file" name="file" accept="image/png,image/jpeg,image/webp" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Subir Imagen</button>
+      </form>
+
+      <!-- Resultado UI -->
+      <div id="resultado"></div>
+    </div>
+  </div>
 
   <script>
     const form = document.getElementById('form-upload');
@@ -31,24 +251,30 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      out.textContent = 'Subiendo…';
+      out.style.display = 'flex';
+      out.innerHTML = '<span style="color: var(--text-muted);">Subiendo imagen...</span>';
       const data = new FormData(form);
       try {
         const res = await fetch('/admin/imagenes/upload', {
           method: 'POST',
-          headers: { [header]: token },   // CSRF via header (safe for multipart)
+          headers: { [header]: token },
           body: data,
           credentials: 'same-origin',
         });
         const json = await res.json();
         if (res.ok) {
-          out.innerHTML = 'URL: <code>' + json.url + '</code> &nbsp; '
-            + '<img src="' + json.url + '" alt="preview" style="max-height:80px;vertical-align:middle">';
+          out.innerHTML = `
+            <div style="flex: 1;">
+              <span style="color: var(--success-color); font-weight: 600; display: block; margin-bottom: 8px;">¡Subida exitosa! Copie esta URL:</span>
+              <code>${json.url}</code>
+            </div>
+            <img src="${json.url}" alt="preview" class="preview-img">
+          `;
         } else {
-          out.textContent = 'Error: ' + (json.error || res.status);
+          out.innerHTML = `<span style="color: var(--danger-color); font-weight: 500;">Error: ${json.error || res.status}</span>`;
         }
       } catch (err) {
-        out.textContent = 'Error de red';
+        out.innerHTML = `<span style="color: var(--danger-color); font-weight: 500;">Error de conexión con el servidor</span>`;
       }
     });
   </script>

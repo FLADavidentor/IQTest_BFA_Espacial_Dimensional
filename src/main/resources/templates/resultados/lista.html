@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultados · Historial de Evaluaciones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --warning-color: #f59e0b;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .user-bar {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .user-info strong {
+      color: var(--text-main);
+    }
+    .logout-btn {
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .logout-btn:hover {
+      opacity: 0.9;
+    }
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+    h1, h2 {
+      font-family: 'Outfit', sans-serif;
+      margin-top: 0;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .back-btn {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+    .back-btn:hover {
+      color: var(--primary-color);
+    }
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      margin-bottom: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    td {
+      font-size: 0.95rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge-success {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: var(--success-color);
+    }
+    .badge-info {
+      background-color: rgba(59, 130, 246, 0.2);
+      color: var(--primary-color);
+    }
+    .badge-danger {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: var(--danger-color);
+    }
+    .badge-warning {
+      background-color: rgba(245, 158, 11, 0.2);
+      color: var(--warning-color);
+    }
+    .action-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      margin-right: 15px;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .action-link:hover {
+      color: var(--primary-hover);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Session Header -->
+  <div class="user-bar" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div class="user-info">
+      <strong>Usuario:</strong> <span sec:authentication="name">User</span> | 
+      <strong>Rol:</strong> <span sec:authentication="principal.authorities">Rol</span>
+    </div>
+    <form th:action="@{/logout}" method="post" style="margin: 0;">
+      <button type="submit" class="logout-btn">Cerrar Sesión</button>
+    </form>
+  </div>
+
+  <div class="container">
+    <div class="header-nav">
+      <h1>Historial de Evaluaciones BFA Espacial</h1>
+      <a th:href="@{/admin/reactivos}" class="back-btn">← Volver al Panel</a>
+    </div>
+
+    <!-- Tabla de Intentos -->
+    <div class="card" style="padding-top: 15px;">
+      <table>
+        <thead>
+          <tr>
+            <th>CIF</th>
+            <th>Período</th>
+            <th>Versión</th>
+            <th>Estado</th>
+            <th>Resultados S1/S2/ST</th>
+            <th>Percentiles S1/S2/ST</th>
+            <th>Consistencia</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="i : ${intentos}">
+            <td th:text="${i.cif}" style="font-weight: 600;">CIF-1234</td>
+            <td th:text="${i.periodoAcademico}">2026-I</td>
+            <td th:text="'V' + ${i.versionFormulario.numeroVersion}">V1</td>
+            <td>
+              <span th:text="${i.estado}" class="badge"
+                    th:classappend="${i.estado == 'COMPLETADO' ? 'badge-success' : 'badge-info'}">
+                ACTIVO
+              </span>
+            </td>
+            <td>
+              <span th:if="${resultados.containsKey(i.id)}" 
+                    th:text="${resultados.get(i.id).pdS1} + ' / ' + ${resultados.get(i.id).pdS2} + ' / ' + ${resultados.get(i.id).pdSt}">
+                10 / 20 / 30
+              </span>
+              <span th:unless="${resultados.containsKey(i.id)}" style="color: var(--text-muted);">—</span>
+            </td>
+            <td>
+              <span th:if="${resultados.containsKey(i.id)}" 
+                    th:text="${resultados.get(i.id).percS1} + ' / ' + ${resultados.get(i.id).percS2} + ' / ' + ${resultados.get(i.id).percSt}"
+                    style="font-weight: 600; color: #60a5fa;">
+                45 / 50 / 60
+              </span>
+              <span th:unless="${resultados.containsKey(i.id)}" style="color: var(--text-muted);">—</span>
+            </td>
+            <td>
+              <!-- Consistency alert (RF-ESP-22 / BR-14) -->
+              <span th:if="${resultados.containsKey(i.id) and resultados.get(i.id).alertaConsistencia != null}" 
+                    th:text="${resultados.get(i.id).alertaConsistencia}"
+                    class="badge badge-warning">
+                ALERTA
+              </span>
+              <span th:if="${resultados.containsKey(i.id) and resultados.get(i.id).alertaConsistencia == null}" 
+                    class="badge badge-success">
+                Válido
+              </span>
+              <span th:unless="${resultados.containsKey(i.id)}" style="color: var(--text-muted);">—</span>
+            </td>
+            <td>
+              <span th:if="${resultados.containsKey(i.id)}">
+                <a th:href="@{|/resultados/${i.cif}/${i.periodoAcademico}|}" class="action-link">Resumen</a>
+                <a th:href="@{|/resultados/${i.cif}/${i.periodoAcademico}/respuestas|}" class="action-link">Respuestas</a>
+              </span>
+              <span th:unless="${resultados.containsKey(i.id)}" style="color: var(--text-muted); font-size: 0.9rem;">
+                Sin terminar
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

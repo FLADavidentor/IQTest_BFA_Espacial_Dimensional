@@ -58,6 +58,7 @@ public class DevSecurityConfig {
                 // Enable CSRF and use a cookie repository accessible by Javascript (React)
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler())
                 )
                 // Add filter to resolve deferred CSRF token so the cookie gets generated on GET requests
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
@@ -70,23 +71,7 @@ public class DevSecurityConfig {
         return new BCryptPasswordEncoder(12); // Strength 12 as per OWASP checklist
     }
 
-    @Bean
-    UserDetailsService devUsers(PasswordEncoder encoder) {
-        return new InMemoryUserDetailsManager(
-                User.withUsername("estudiante")
-                        .password(encoder.encode("estudiante123"))
-                        .roles("ESTUDIANTE")
-                        .build(),
-                User.withUsername("evaluador")
-                        .password(encoder.encode("evaluador123"))
-                        .roles("EVALUADOR")
-                        .build(),
-                User.withUsername("admin")
-                        .password(encoder.encode("admin123"))
-                        .roles("ADMIN")
-                        .build()
-        );
-    }
+
 
     /**
      * Filter to force generation of the deferred CSRF token on initial page loads.

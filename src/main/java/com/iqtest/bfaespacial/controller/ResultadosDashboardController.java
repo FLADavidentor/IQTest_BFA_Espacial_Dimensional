@@ -53,6 +53,7 @@ public class ResultadosDashboardController {
         m.put(snake ? "perc_s1" : "percS1", r.getPercS1());
         m.put(snake ? "perc_s2" : "percS2", r.getPercS2());
         m.put(snake ? "perc_st" : "percSt", r.getPercSt());
+        m.put(snake ? "alerta_consistencia" : "alertaConsistencia", r.getAlertaConsistencia());
         m.put(snake ? "fecha_calculo" : "fechaCalculo", r.getFechaCalculo());
         return m;
     }

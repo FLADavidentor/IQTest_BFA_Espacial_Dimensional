@@ -46,6 +46,9 @@ public class Resultado {
     @Column(name = "perc_st", nullable = false)
     private Short percSt;
 
+    @Column(name = "alerta_consistencia")
+    private String alertaConsistencia;
+
     @Column(name = "fecha_calculo", nullable = false)
     private OffsetDateTime fechaCalculo = OffsetDateTime.now();
 }
