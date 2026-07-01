@@ -1,15 +1,42 @@
-# ============================================================
-#  BFA Espacial Dimensional — Setup from scratch (Windows)
-#  Assumes: only the cloned repository exists.
-#  Run in PowerShell as Administrator:
-#    Set-ExecutionPolicy Bypass -Scope Process -Force
-#    .\setup.ps1
-# ============================================================
-$ErrorActionPreference = "Stop"
+<#
+.SYNOPSIS
+  BFA Espacial Dimensional - Setup, Run and Cleanup (Windows)
+.DESCRIPTION
+  Fully automatic: starts PostgreSQL, verifies DB, compiles, runs.
+  Ctrl+C stops everything and cleans up.
+.NOTES
+  Prerequisites: Java 17+ and PostgreSQL on PATH or in standard locations.
+  Run: Set-ExecutionPolicy Bypass -Scope Process -Force; .\setup.ps1
+#>
 
-function Ok($msg)   { Write-Host "[OK] $msg" -ForegroundColor Green }
-function Warn($msg) { Write-Host "[!]  $msg" -ForegroundColor Yellow }
-function Fail($msg) { Write-Host "[X]  $msg" -ForegroundColor Red; exit 1 }
+$ErrorActionPreference = "Continue"
+$script:SPRING_PROCESS = $null
+$script:PG_STARTED_BY_US = $false
+$script:PG_DATA_DIR = $null
+$script:PG_SERVICE_NAME = $null
+
+function Show-Ok($msg)   { Write-Host "  [OK] $msg" -ForegroundColor Green }
+function Show-Warn($msg) { Write-Host "  [!]  $msg" -ForegroundColor Yellow }
+function Show-Fail($msg) { Write-Host "  [X]  $msg" -ForegroundColor Red; exit 1 }
+
+function Invoke-Cleanup {
+    Write-Host ""
+    Write-Host "-- Deteniendo servicios..." -ForegroundColor Yellow
+    if ($script:SPRING_PROCESS -ne $null -and -not $script:SPRING_PROCESS.HasExited) {
+        Stop-Process -Id $script:SPRING_PROCESS.Id -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 2
+        Show-Ok "Spring Boot detenido."
+    }
+    if ($script:PG_STARTED_BY_US) {
+        if ($script:PG_SERVICE_NAME) {
+            Stop-Service $script:PG_SERVICE_NAME -Force -ErrorAction SilentlyContinue
+        } elseif ($script:PG_DATA_DIR) {
+            & pg_ctl stop -D $script:PG_DATA_DIR -m fast 2>$null
+        }
+        Show-Ok "PostgreSQL detenido."
+    }
+    Write-Host "-- Limpieza completada." -ForegroundColor Green
+}
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
@@ -17,154 +44,130 @@ Write-Host "  BFA Espacial Dimensional - Setup"      -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# ── Check Administrator ──
-$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if (-not $isAdmin) {
-    Warn "Se recomienda ejecutar como Administrador para instalar software."
-    Warn "Si ya tienes Java 17+, PostgreSQL y Node.js, puedes continuar."
-    $continue = Read-Host "Continuar de todos modos? (S/n)"
-    if ($continue -eq "n") { exit 0 }
-}
-
-# ── 1. Java 17+ ──
-Write-Host "-- Verificando Java..." -ForegroundColor White
+# ── 1. Java ──
+Write-Host "-- [1/5] Java..." -ForegroundColor White
 $javaCmd = Get-Command java -ErrorAction SilentlyContinue
-if ($javaCmd) {
-    $javaVerOutput = & java -version 2>&1 | Select-Object -First 1
-    if ($javaVerOutput -match '"(\d+)') {
-        $javaMajor = [int]$Matches[1]
-        if ($javaMajor -ge 17) {
-            Ok "Java $javaMajor detectado."
-        } else {
-            Warn "Java $javaMajor detectado pero se requiere 17+."
-            Warn "Instalando OpenJDK 17 via winget..."
-            winget install --id Microsoft.OpenJDK.17 --accept-source-agreements --accept-package-agreements --silent
-            # Refresh PATH
-            $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
+if (-not $javaCmd) { Show-Fail "Java no encontrado. Instala JDK 17+ desde https://adoptium.net" }
+$jvOut = & java -version 2>&1 | Select-Object -First 1
+Show-Ok "$jvOut"
+
+# ── 2. PostgreSQL binary ──
+Write-Host "-- [2/5] PostgreSQL..." -ForegroundColor White
+$pgBinDirs = @(
+    "C:\Program Files\PostgreSQL\17\bin",
+    "C:\Program Files\PostgreSQL\16\bin",
+    "C:\Program Files\PostgreSQL\15\bin",
+    "$env:USERPROFILE\pgsql\bin",
+    "C:\pgsql\bin"
+)
+foreach ($p in $pgBinDirs) {
+    if (Test-Path "$p\psql.exe") { $env:PATH += ";$p"; break }
+}
+if (-not (Get-Command psql -ErrorAction SilentlyContinue)) {
+    Show-Fail "PostgreSQL no encontrado. Instala desde https://www.postgresql.org/download/"
+}
+Show-Ok (& psql --version)
+
+# ── 3. Start PostgreSQL ──
+Write-Host "-- [3/5] Iniciando PostgreSQL..." -ForegroundColor White
+$pgSvc = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($pgSvc) {
+    $script:PG_SERVICE_NAME = $pgSvc.Name
+    if ($pgSvc.Status -ne "Running") {
+        $script:PG_STARTED_BY_US = $true
+        Start-Service $pgSvc.Name; Start-Sleep 3
+    }
+    Show-Ok "Servicio $($pgSvc.Name) activo."
+} else {
+    # Portable pg_ctl
+    $dataDirs = @("$env:USERPROFILE\pgsql\data","C:\pgsql\data") | Where-Object { Test-Path $_ }
+    if ($dataDirs.Count -eq 0 -and $env:PGDATA -and (Test-Path $env:PGDATA)) { $dataDirs = @($env:PGDATA) }
+    if ($dataDirs.Count -eq 0) { Show-Fail "No se encontro data directory de PostgreSQL." }
+    $script:PG_DATA_DIR = $dataDirs[0]
+    $st = & pg_ctl status -D $script:PG_DATA_DIR 2>$null
+    if ("$st" -notmatch "running") {
+        $script:PG_STARTED_BY_US = $true
+        & pg_ctl start -D $script:PG_DATA_DIR -l "$($script:PG_DATA_DIR)\server.log" -w 2>$null | Out-Null
+        # Wait until accepting connections (crash recovery can take time)
+        for ($w = 0; $w -lt 15; $w++) {
+            Start-Sleep 2
+            $ready = & pg_isready -h 127.0.0.1 2>$null
+            if ("$ready" -match "accepting") { break }
         }
     }
-} else {
-    Warn "Java no encontrado. Instalando OpenJDK 17 via winget..."
-    $wingetCmd = Get-Command winget -ErrorAction SilentlyContinue
-    if (-not $wingetCmd) {
-        Fail "winget no disponible. Instala Java 17+ manualmente desde https://adoptium.net"
-    }
-    winget install --id Microsoft.OpenJDK.17 --accept-source-agreements --accept-package-agreements --silent
-    # Refresh PATH
-    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
-}
-Ok "Java listo: $(java -version 2>&1 | Select-Object -First 1)"
-
-# ── 2. PostgreSQL ──
-Write-Host ""
-Write-Host "-- Verificando PostgreSQL..." -ForegroundColor White
-$psqlCmd = Get-Command psql -ErrorAction SilentlyContinue
-if ($psqlCmd) {
-    Ok "PostgreSQL detectado: $(psql --version)"
-} else {
-    Warn "PostgreSQL no encontrado. Instalando via winget..."
-    winget install --id PostgreSQL.PostgreSQL.16 --accept-source-agreements --accept-package-agreements --silent
-    # Refresh PATH
-    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
-    # Also add common PostgreSQL paths
-    $pgPaths = @(
-        "C:\Program Files\PostgreSQL\16\bin",
-        "C:\Program Files\PostgreSQL\17\bin",
-        "C:\Program Files\PostgreSQL\15\bin"
-    )
-    foreach ($p in $pgPaths) {
-        if (Test-Path $p) { $env:PATH += ";$p" }
-    }
+    Show-Ok "PostgreSQL activo (pg_ctl)."
 }
 
-# Start PostgreSQL service
-Write-Host "-- Iniciando servicio PostgreSQL..." -ForegroundColor White
-$pgService = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue | Select-Object -First 1
-if ($pgService) {
-    if ($pgService.Status -ne "Running") {
-        Start-Service $pgService.Name -ErrorAction SilentlyContinue
-    }
-    Ok "Servicio PostgreSQL en ejecucion: $($pgService.Name)"
-} else {
-    Warn "No se encontro servicio PostgreSQL. Asegurate de que este en ejecucion."
-}
+# ── 4. Database ──
+Write-Host "-- [4/5] Base de datos..." -ForegroundColor White
 
-# Create DB and user
-Write-Host "-- Creando base de datos 'bfa' y usuario 'bfa'..." -ForegroundColor White
-try {
-    # Try with default postgres superuser
-    $env:PGPASSWORD = "postgres"
-    
-    # Check if user exists
-    $userExists = & psql -U postgres -h localhost -tc "SELECT 1 FROM pg_roles WHERE rolname='bfa'" 2>$null
-    if ($userExists -notmatch "1") {
-        & psql -U postgres -h localhost -c "CREATE USER bfa WITH PASSWORD 'bfa';" 2>$null
-        Ok "Usuario 'bfa' creado."
+# First: check if bfa DB already works (most common case after first run)
+$env:PGPASSWORD = "bfa"
+$bfaOk = & psql -U bfa -h 127.0.0.1 -d bfa -tc "SELECT 'OK'" 2>$null
+if ("$bfaOk" -match "OK") {
+    Show-Ok "BD 'bfa' lista (ya existia)."
+} else {
+    # Need to create. Try superuser: postgres, current user, common names
+    $created = $false
+    $superUsers = @("postgres", $env:USERNAME, "admin", "root")
+    foreach ($su in $superUsers) {
+        $env:PGPASSWORD = ""
+        $check = & psql -U $su -h 127.0.0.1 -d postgres -tc "SELECT 1" 2>$null
+        if ("$check" -match "1") {
+            Show-Ok "Superusuario: $su"
+            & psql -U $su -h 127.0.0.1 -d postgres -c "CREATE USER bfa WITH PASSWORD 'bfa'" 2>$null
+            & psql -U $su -h 127.0.0.1 -d postgres -c "CREATE DATABASE bfa OWNER bfa" 2>$null
+            & psql -U $su -h 127.0.0.1 -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE bfa TO bfa" 2>$null
+            $created = $true
+            break
+        }
+    }
+    if (-not $created) {
+        # Try createdb/createuser (works with trust auth on some setups)
+        & createuser -h 127.0.0.1 bfa 2>$null
+        & createdb -h 127.0.0.1 -O bfa bfa 2>$null
+        $env:PGPASSWORD = "bfa"
+        & psql -U bfa -h 127.0.0.1 -d bfa -c "SELECT 1" 2>$null | Out-Null
+    }
+    # Final verify
+    $env:PGPASSWORD = "bfa"
+    $finalCheck = & psql -U bfa -h 127.0.0.1 -d bfa -tc "SELECT 'OK'" 2>$null
+    if ("$finalCheck" -match "OK") {
+        Show-Ok "BD 'bfa' creada y verificada."
     } else {
-        Ok "Usuario 'bfa' ya existe."
+        Show-Fail "No se pudo crear la BD. Ejecuta manualmente: CREATE USER bfa PASSWORD 'bfa'; CREATE DATABASE bfa OWNER bfa;"
     }
-    
-    # Check if DB exists
-    $dbExists = & psql -U postgres -h localhost -tc "SELECT 1 FROM pg_database WHERE datname='bfa'" 2>$null
-    if ($dbExists -notmatch "1") {
-        & psql -U postgres -h localhost -c "CREATE DATABASE bfa OWNER bfa;" 2>$null
-        Ok "Base de datos 'bfa' creada."
-    } else {
-        Ok "Base de datos 'bfa' ya existe."
-    }
-    
-    & psql -U postgres -h localhost -c "GRANT ALL PRIVILEGES ON DATABASE bfa TO bfa;" 2>$null
-    Ok "Base de datos 'bfa' lista."
-} catch {
-    Warn "No se pudo crear la BD automaticamente."
-    Write-Host ""
-    Write-Host "  Crea la BD manualmente con estos comandos:" -ForegroundColor Yellow
-    Write-Host "    psql -U postgres" -ForegroundColor Gray
-    Write-Host "    CREATE USER bfa WITH PASSWORD 'bfa';" -ForegroundColor Gray
-    Write-Host "    CREATE DATABASE bfa OWNER bfa;" -ForegroundColor Gray
-    Write-Host "    GRANT ALL PRIVILEGES ON DATABASE bfa TO bfa;" -ForegroundColor Gray
-    Write-Host ""
 }
-
 $env:PGPASSWORD = ""
 
-# ── 3. Node.js (opcional) ──
+# ── 5. Compile ──
+Write-Host "-- [5/5] Compilando..." -ForegroundColor White
+& .\mvnw.cmd compile -q -DskipTests 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) { Show-Fail "Error de compilacion." }
+Show-Ok "Compilado."
+
+# ── Run ──
 Write-Host ""
-Write-Host "-- Verificando Node.js (opcional, para automatizacion)..." -ForegroundColor White
-$nodeCmd = Get-Command node -ErrorAction SilentlyContinue
-if ($nodeCmd) {
-    Ok "Node.js detectado: $(node --version)"
-    if (Test-Path "package.json") {
-        Write-Host "   Instalando dependencias npm..."
-        npm install --silent 2>$null
-    }
-} else {
-    Warn "Node.js no encontrado. Solo es necesario para automate.js (capturas)."
-    Warn "Instalalo desde https://nodejs.org si quieres usar la automatizacion."
+Write-Host "========================================" -ForegroundColor Green
+Write-Host "  Servidor iniciando..."                  -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Green
+Write-Host ""
+Write-Host "  http://localhost:8080/login"
+Write-Host "  Admin:      admin / admin123"          -ForegroundColor Gray
+Write-Host "  Evaluador:  evaluador / evaluador123"  -ForegroundColor Gray
+Write-Host "  Estudiante: estudiante / estudiante123" -ForegroundColor Gray
+Write-Host ""
+Write-Host "  Ctrl+C para detener." -ForegroundColor Yellow
+Write-Host ""
+
+$script:SPRING_PROCESS = Start-Process -FilePath ".\mvnw.cmd" -ArgumentList "spring-boot:run" -NoNewWindow -PassThru
+
+for ($i = 0; $i -lt 30; $i++) {
+    Start-Sleep 2
+    try {
+        $r = Invoke-WebRequest -Uri "http://localhost:8080/login" -UseBasicParsing -TimeoutSec 2 -ErrorAction SilentlyContinue
+        if ($r.StatusCode -eq 200) { Show-Ok "Servidor listo!"; break }
+    } catch {}
 }
 
-# ── 4. Build ──
-Write-Host ""
-Write-Host "-- Compilando el proyecto..." -ForegroundColor White
-& .\mvnw.cmd compile -q -DskipTests
-Ok "Proyecto compilado exitosamente."
-
-# ── 5. Done ──
-Write-Host ""
-Write-Host "========================================" -ForegroundColor Green
-Write-Host "  Setup completado!" -ForegroundColor Green
-Write-Host "========================================" -ForegroundColor Green
-Write-Host ""
-Write-Host "  Para iniciar el servidor:" -ForegroundColor White
-Write-Host "    .\mvnw.cmd spring-boot:run" -ForegroundColor Gray
-Write-Host ""
-Write-Host "  Luego abre:  http://localhost:8080/login" -ForegroundColor White
-Write-Host ""
-Write-Host "  Credenciales:" -ForegroundColor White
-Write-Host "    Admin:      admin / admin123" -ForegroundColor Gray
-Write-Host "    Evaluador:  evaluador / evaluador123" -ForegroundColor Gray
-Write-Host "    Estudiante: estudiante / estudiante123" -ForegroundColor Gray
-Write-Host ""
-Write-Host "  (Opcional) Para capturas automaticas:" -ForegroundColor White
-Write-Host "    node automate.js" -ForegroundColor Gray
-Write-Host ""
+try { $script:SPRING_PROCESS.WaitForExit() } finally { Invoke-Cleanup }
