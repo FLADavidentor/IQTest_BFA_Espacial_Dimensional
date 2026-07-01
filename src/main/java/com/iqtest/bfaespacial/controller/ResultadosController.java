@@ -8,11 +8,13 @@ import com.iqtest.bfaespacial.repository.OpcionReactivoRepository;
 import com.iqtest.bfaespacial.repository.RespuestaRepository;
 import com.iqtest.bfaespacial.repository.ResultadoRepository;
 import com.iqtest.bfaespacial.service.ResultadoService;
+import com.iqtest.bfaespacial.service.MonitoreoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -32,15 +34,17 @@ public class ResultadosController {
     private final RespuestaRepository respuestaRepo;
     private final OpcionReactivoRepository opcionRepo;
     private final ResultadoRepository resultadoRepo;
+    private final MonitoreoService monitoreoService;
 
     public ResultadosController(IntentoRepository intentoRepo, ResultadoService resultadoService,
                                 RespuestaRepository respuestaRepo, OpcionReactivoRepository opcionRepo,
-                                ResultadoRepository resultadoRepo) {
+                                ResultadoRepository resultadoRepo, MonitoreoService monitoreoService) {
         this.intentoRepo = intentoRepo;
         this.resultadoService = resultadoService;
         this.respuestaRepo = respuestaRepo;
         this.opcionRepo = opcionRepo;
         this.resultadoRepo = resultadoRepo;
+        this.monitoreoService = monitoreoService;
     }
 
     @GetMapping("/resultados")
@@ -50,7 +54,20 @@ public class ResultadosController {
                 .collect(Collectors.toMap(Resultado::getIntentoId, r -> r));
         model.addAttribute("intentos", intentos);
         model.addAttribute("resultados", resultadosMap);
+        model.addAttribute("activos", monitoreoService.obtenerIntentosActivos());
         return "resultados/lista";
+    }
+
+    @PostMapping("/resultados/monitoreo/forzar/{id}")
+    public String forzar(@PathVariable Long id) {
+        monitoreoService.forzarFinalizacion(id);
+        return "redirect:/resultados";
+    }
+
+    @PostMapping("/resultados/monitoreo/anular/{id}")
+    public String anular(@PathVariable Long id) {
+        monitoreoService.anularIntento(id);
+        return "redirect:/resultados";
     }
 
     @GetMapping("/resultados/{cif}/{periodo}")

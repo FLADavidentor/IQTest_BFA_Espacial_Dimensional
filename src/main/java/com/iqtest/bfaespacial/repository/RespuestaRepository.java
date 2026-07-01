@@ -19,6 +19,9 @@ public interface RespuestaRepository extends JpaRepository<Respuesta, Long> {
     // UC6 review: all answers of an intento.
     java.util.List<Respuesta> findByEjecucionSubtestIntentoId(Long intentoId);
 
+    // Count answers submitted in a subtest execution
+    long countByEjecucionSubtestId(Long ejecucionSubtestId);
+
     /** §13: correct-answer count for one subtest type within an intento. */
     @Query("""
             SELECT COUNT(r) FROM Respuesta r
@@ -28,5 +31,3 @@ public interface RespuestaRepository extends JpaRepository<Respuesta, Long> {
             """)
     long countCorrectas(@Param("intentoId") Long intentoId, @Param("tipo") TipoSubtest tipo);
 }
-
-

@@ -1,5 +1,4 @@
 package com.iqtest.bfaespacial.security;
-import com.iqtest.bfaespacial.model.Respuesta;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/integracion/**").permitAll()
                         .requestMatchers("/evaluacion/**", "/api/subtest/**", "/api/respuesta/**")
                             .hasRole("ESTUDIANTE")
-                        .requestMatchers("/resultados/**").hasRole("EVALUADOR")
+                        .requestMatchers("/resultados/**").hasAnyRole("EVALUADOR", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults())

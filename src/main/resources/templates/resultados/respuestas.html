@@ -1,18 +1,71 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Revisión de respuestas</title></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Revisión de Respuestas · BFA Espacial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/admin.css}" href="/css/admin.css">
+</head>
 <body>
-  <h1>Revisión de respuestas</h1>
-  <p>CIF <span th:text="${cif}">—</span> · Periodo <span th:text="${periodo}">—</span></p>
-  <table border="1">
-    <tr><th>Subtest</th><th>Ítem</th><th>Respuesta estudiante</th><th>Correcta</th><th>¿Acierto?</th></tr>
-    <tr th:each="i : ${items}">
-      <td th:text="${i.tipoSubtest}">—</td>
-      <td th:text="${i.imagenUrl}">—</td>
-      <td th:text="${i.respuestaEstudiante}">—</td>
-      <td th:text="${i.respuestaCorrecta}">—</td>
-      <td th:text="${i.correcta} ? 'Sí' : 'No'">—</td>
-    </tr>
-  </table>
+  <!-- Session Header -->
+  <div class="user-bar" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div class="user-info">
+      <strong>Usuario:</strong> <span sec:authentication="name">User</span> | 
+      <strong>Rol:</strong> <span sec:authentication="principal.authorities">Rol</span>
+    </div>
+    <form th:action="@{/logout}" method="post" style="margin: 0;">
+      <button type="submit" class="logout-btn">Cerrar Sesión</button>
+    </form>
+  </div>
+
+  <div class="container">
+    <div class="header-nav">
+      <h1>Detalle de Respuestas</h1>
+      <a th:href="@{|/resultados/${cif}/${periodo}|}" class="back-btn">← Volver al Reporte</a>
+    </div>
+
+    <!-- Details card -->
+    <div class="card detail-grid">
+      <div class="detail-item">
+        <div class="detail-label">CIF Aspirante</div>
+        <div class="detail-value" th:text="${cif}">CIF-0000</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Período Académico</div>
+        <div class="detail-value" th:text="${periodo}">2026-I</div>
+      </div>
+    </div>
+
+    <!-- Answers Grid Table -->
+    <div class="card" style="padding-top: 15px;">
+      <h2>Historial de Respuestas por Ítem</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Subtest</th>
+            <th>Ubicación Imagen / Ítem</th>
+            <th>Respuesta Aspirante</th>
+            <th>Respuesta Correcta</th>
+            <th>Resultado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="i : ${items}">
+            <td>
+              <span class="badge badge-info" th:text="${i.tipoSubtest}">S1A</span>
+            </td>
+            <td th:text="${i.imagenUrl}" style="font-family: monospace; font-size: 0.85rem;">item_1.png</td>
+            <td th:text="${i.respuestaEstudiante}" style="font-family: monospace; font-weight: bold; text-align: center;">A</td>
+            <td th:text="${i.respuestaCorrecta}" style="font-family: monospace; font-weight: bold; text-align: center;">A</td>
+            <td>
+              <span th:if="${i.correcta}" class="badge badge-success">✓ Acierto</span>
+              <span th:unless="${i.correcta}" class="badge badge-danger">✗ Fallo</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </body>
 </html>

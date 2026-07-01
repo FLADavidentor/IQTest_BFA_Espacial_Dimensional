@@ -1,26 +1,104 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Resultados</title></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultados de Evaluación · BFA Espacial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/admin.css}" href="/css/admin.css">
+</head>
 <body>
-  <div style="background-color: #f1f5f9; padding: 10px 20px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center;" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-    <div>
+  <!-- Session Header -->
+  <div class="user-bar" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div class="user-info">
       <strong>Usuario:</strong> <span sec:authentication="name">User</span> | 
-      <strong>Rol actual:</strong> <span sec:authentication="principal.authorities">Rol</span>
+      <strong>Rol:</strong> <span sec:authentication="principal.authorities">Rol</span>
     </div>
     <form th:action="@{/logout}" method="post" style="margin: 0;">
-      <button type="submit" style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
+      <button type="submit" class="logout-btn">Cerrar Sesión</button>
     </form>
   </div>
-  <h1>Resultados</h1>
-  <p>CIF <span th:text="${cif}">—</span> · Periodo <span th:text="${periodo}">—</span></p>
-  <table border="1">
-    <tr><th>Factor</th><th>Puntuación directa</th><th>Percentil</th></tr>
-    <tr><td>S1a</td><td th:text="${resultado.pdS1a}">—</td><td>—</td></tr>
-    <tr><td>S1b</td><td th:text="${resultado.pdS1b}">—</td><td>—</td></tr>
-    <tr><td>S1</td><td th:text="${resultado.pdS1}">—</td><td th:text="${resultado.percS1}">—</td></tr>
-    <tr><td>S2</td><td th:text="${resultado.pdS2}">—</td><td th:text="${resultado.percS2}">—</td></tr>
-    <tr><td>ST</td><td th:text="${resultado.pdSt}">—</td><td th:text="${resultado.percSt}">—</td></tr>
-  </table>
-  <p><a th:href="@{|/resultados/${cif}/${periodo}/respuestas|}">Revisar respuestas</a></p>
+
+  <div class="container">
+    <div class="header-nav">
+      <h1>Reporte Psicométrico</h1>
+      <a th:href="@{/resultados}" class="back-btn">← Volver a Resultados</a>
+    </div>
+
+    <!-- Student details card -->
+    <div class="card detail-grid">
+      <div class="detail-item">
+        <div class="detail-label">CIF Aspirante</div>
+        <div class="detail-value" th:text="${cif}">CIF-0000</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Período Académico</div>
+        <div class="detail-value" th:text="${periodo}">2026-I</div>
+      </div>
+      <div class="detail-item" th:if="${resultado.alertaConsistencia != null}">
+        <div class="detail-label">Consistencia Interna</div>
+        <div class="detail-value">
+          <span th:text="${resultado.alertaConsistencia}" class="badge badge-warning">ALERTA</span>
+        </div>
+      </div>
+      <div class="detail-item" th:unless="${resultado.alertaConsistencia != null}">
+        <div class="detail-label">Consistencia Interna</div>
+        <div class="detail-value">
+          <span class="badge badge-success">Válido / Confiable</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scores Table -->
+    <div class="card" style="padding-top: 15px;">
+      <h2>Resultados Obtenidos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Factor / Subtest</th>
+            <th>Puntuación Directa</th>
+            <th>Percentil Mapeado</th>
+            <th>Interpretación (Baremo Nic. 1992)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>S1a — Figuras Idénticas</td>
+            <td th:text="${resultado.pdS1a}">0</td>
+            <td>—</td>
+            <td style="color: var(--text-muted);">Rapidez perceptiva (Gestalt)</td>
+          </tr>
+          <tr>
+            <td>S1b — Ladrillos-Cubos</td>
+            <td th:text="${resultado.pdS1b}">0</td>
+            <td>—</td>
+            <td style="color: var(--text-muted);">Percepción tridimensional</td>
+          </tr>
+          <tr style="font-weight: bold; border-top: 2px dashed var(--border-color);">
+            <td>S1 — Factor Espacial 1 (Compuesto)</td>
+            <td th:text="${resultado.pdS1}">0</td>
+            <td th:text="${resultado.percS1}" style="color: #60a5fa;">0</td>
+            <td style="color: var(--text-main);">Gestalt y Percepción 3D</td>
+          </tr>
+          <tr>
+            <td>S2 — Desplazamiento Espacial</td>
+            <td th:text="${resultado.pdS2}">0</td>
+            <td th:text="${resultado.percS2}" style="color: #60a5fa;">0</td>
+            <td style="color: var(--text-muted);">Visualización y Rotación espacial</td>
+          </tr>
+          <tr style="font-weight: bold; border-top: 2px solid var(--border-color); font-size: 1.05rem;">
+            <td>ST — Factor Espacial Total</td>
+            <td th:text="${resultado.pdSt}">0</td>
+            <td th:text="${resultado.percSt}" style="color: #3b82f6;">0</td>
+            <td style="color: var(--text-main);">Aptitud Espacial Global</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 30px; text-align: right;">
+        <a th:href="@{|/resultados/${cif}/${periodo}/respuestas|}" class="btn-primary" style="text-decoration: none; display: inline-block;">Revisar Respuestas Detalladas →</a>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

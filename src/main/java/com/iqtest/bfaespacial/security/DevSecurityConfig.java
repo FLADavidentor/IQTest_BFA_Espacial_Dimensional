@@ -1,5 +1,4 @@
 package com.iqtest.bfaespacial.security;
-import com.iqtest.bfaespacial.model.Respuesta;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -38,13 +37,13 @@ public class DevSecurityConfig {
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .requestMatchers("/api/integracion/**").permitAll()
                         .requestMatchers("/evaluacion/**", "/api/subtest/**", "/api/respuesta/**").hasRole("ESTUDIANTE")
-                        .requestMatchers("/resultados/**").hasRole("EVALUADOR")
+                        .requestMatchers("/resultados/**").hasAnyRole("EVALUADOR", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/evaluacion/inicio", true)
+                        .defaultSuccessUrl("/", true)
                         .failureUrl("/login?error")
                         .permitAll()
                 )

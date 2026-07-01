@@ -1,38 +1,99 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Admin · Opciones</title></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Opciones de Reactivo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/admin.css}" href="/css/admin.css">
+</head>
 <body>
-  <h1>Opciones del reactivo
-     <span th:text="${reactivo.tipoSubtest} + ' #' + ${reactivo.id} + ' (orden ' + ${reactivo.orden} + ')'">—</span>
-  </h1>
-  <p><a th:href="@{/admin/reactivos}">&larr; Reactivos</a></p>
-  <p th:if="${error}" th:text="${error}" style="color:red">error</p>
+  <!-- Session Header -->
+  <div class="user-bar" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div class="user-info">
+      <strong>Usuario:</strong> <span sec:authentication="name">User</span> | 
+      <strong>Rol:</strong> <span sec:authentication="principal.authorities">Rol</span>
+    </div>
+    <form th:action="@{/logout}" method="post" style="margin: 0;">
+      <button type="submit" class="logout-btn">Cerrar Sesión</button>
+    </form>
+  </div>
 
-  <table border="1">
-    <tr><th>Etiqueta</th><th>¿Correcta?</th><th></th></tr>
-    <tr th:each="o : ${opciones}">
-      <td th:text="${o.etiqueta}">—</td>
-      <td th:text="${o.esCorrecta} ? 'Sí' : 'No'">—</td>
-      <td>
-        <form th:action="@{|/admin/reactivos/${reactivo.id}/opciones/${o.id}/correcta|}" method="post" style="display:inline">
-          <button type="submit" th:disabled="${o.esCorrecta}">Marcar correcta</button>
-        </form>
-        <form th:action="@{|/admin/reactivos/${reactivo.id}/opciones/${o.id}/eliminar|}" method="post" style="display:inline">
-          <button type="submit">Eliminar</button>
-        </form>
-      </td>
-    </tr>
-  </table>
+  <div class="container">
+    <div class="header-nav">
+      <h1>Opciones del Reactivo</h1>
+      <a th:href="@{/admin/reactivos}" class="back-btn">← Volver a Reactivos</a>
+    </div>
 
-  <h2>Agregar opción</h2>
-  <form th:action="@{|/admin/reactivos/${reactivo.id}/opciones|}" method="post">
-    <label>Etiqueta:
-      <select name="etiqueta">
-        <option th:each="e : ${etiquetas}" th:value="${e}" th:text="${e}">A</option>
-      </select>
-    </label>
-    <label>Correcta: <input type="checkbox" name="correcta" value="true"></label>
-    <button type="submit">Agregar</button>
-  </form>
+    <!-- Active item info card -->
+    <div class="card detail-grid">
+      <div class="detail-item">
+        <div class="detail-label">Subtest</div>
+        <div class="detail-value" th:text="${reactivo.tipoSubtest}">S1A</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Nro Ítem (Orden)</div>
+        <div class="detail-value" th:text="${reactivo.orden}">1</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">ID de Base de Datos</div>
+        <div class="detail-value" th:text="${reactivo.id}">12</div>
+      </div>
+    </div>
+
+    <!-- Options List Table -->
+    <div class="card" style="padding-top: 15px;">
+      <h2>Listado de Opciones</h2>
+      <p th:if="${error}" th:text="${error}" style="color:var(--danger-color); font-weight: bold;">error</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Etiqueta</th>
+            <th>¿Correcta?</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="o : ${opciones}">
+            <td th:text="${o.etiqueta}" style="font-family: monospace; font-weight: bold; font-size: 1.1rem;">A</td>
+            <td>
+              <span th:if="${o.esCorrecta}" class="badge badge-success">Sí, Correcta</span>
+              <span th:unless="${o.esCorrecta}" class="badge badge-info">No</span>
+            </td>
+            <td>
+              <form th:action="@{|/admin/reactivos/${reactivo.id}/opciones/${o.id}/correcta|}" method="post" style="display:inline; margin-right: 10px;">
+                <button type="submit" class="btn-warning-flat" th:disabled="${o.esCorrecta}">Marcar Correcta</button>
+              </form>
+              <form th:action="@{|/admin/reactivos/${reactivo.id}/opciones/${o.id}/eliminar|}" method="post" style="display:inline;">
+                <button type="submit" class="btn-danger-flat">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Add Option Form -->
+    <div class="card">
+      <h2>Agregar Opción de Respuesta</h2>
+      <form th:action="@{|/admin/reactivos/${reactivo.id}/opciones|}" method="post">
+        <div class="form-group" style="max-width: 300px;">
+          <label for="etiqueta">Etiqueta</label>
+          <select name="etiqueta" id="etiqueta">
+            <option th:each="e : ${etiquetas}" th:value="${e}" th:text="${e}">A</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <input type="checkbox" name="correcta" value="true" style="width: auto;">
+            Marcar como correcta (es_correcta)
+          </label>
+        </div>
+        <div style="margin-top: 15px;">
+          <button type="submit" class="btn-primary">Agregar Opción</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </body>
 </html>

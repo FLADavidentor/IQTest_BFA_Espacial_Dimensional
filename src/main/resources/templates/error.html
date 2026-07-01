@@ -1,9 +1,92 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Error</title></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'Error ' + ${status} + ' · BFA Espacial'">Error · BFA Espacial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0F1117;
+      --border: #2E3139;
+      --text: #E2E8F0;
+      --muted: #64748B;
+      --accent: #3B82F6;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .error-container {
+      text-align: center;
+      max-width: 480px;
+      padding: 40px 24px;
+    }
+    .error-code {
+      font-size: 6rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      margin: 0;
+      line-height: 1;
+    }
+    .error-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 16px 0 8px 0;
+    }
+    .error-message {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0 0 32px 0;
+    }
+    .error-link {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: background 0.15s;
+    }
+    .error-link:hover { background: #2563EB; }
+    .error-divider {
+      width: 48px;
+      height: 2px;
+      background: var(--border);
+      margin: 24px auto;
+    }
+    .error-detail {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 24px;
+    }
+  </style>
+</head>
 <body>
-  <h1>Ha ocurrido un error</h1>
-  <p th:text="${status} + ' ' + ${error}">Error</p>
-  <p>Si el problema persiste, contacta al administrador del módulo.</p>
+  <div class="error-container">
+    <p class="error-code" th:text="${status}">404</p>
+    <h1 class="error-title" th:text="${error}">No Encontrado</h1>
+    <div class="error-divider"></div>
+    <p class="error-message" th:text="${message ?: 'El recurso solicitado no existe o no está disponible.'}">
+      El recurso solicitado no existe o no está disponible.
+    </p>
+    <a href="/" class="error-link">Volver al Inicio</a>
+    <p class="error-detail">
+      BFA Espacial Dimensional
+    </p>
+  </div>
 </body>
 </html>

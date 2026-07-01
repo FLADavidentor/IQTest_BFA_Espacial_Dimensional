@@ -180,6 +180,29 @@ async function main() {
                 console.log("   -> Captura 9 guardada (Burbuja grafito).");
             }
 
+            // ── Monitoreo en Vivo: capturar DURANTE el test activo ──
+            console.log("11.1. Abriendo contexto admin para capturar Monitoreo en Vivo...");
+            const adminCtx = await browser.createBrowserContext();
+            const adminPage = await adminCtx.newPage();
+            await adminPage.setViewport({ width: 1024, height: 768 });
+            await adminPage.goto('http://localhost:8080/login', { waitUntil: 'networkidle2' });
+            await adminPage.type('input[name="username"]', 'admin');
+            await adminPage.type('input[name="password"]', 'admin123');
+            await Promise.all([
+                adminPage.click('button[type="submit"]'),
+                adminPage.waitForNavigation({ waitUntil: 'networkidle2' })
+            ]);
+            await adminPage.goto('http://localhost:8080/resultados', { waitUntil: 'networkidle2' });
+            const liveMonBtn = await adminPage.$('#btn-monitoreo');
+            if (liveMonBtn) {
+                await liveMonBtn.click();
+                await new Promise(r => setTimeout(r, 400));
+            }
+            await adminPage.screenshot({ path: path.join(artDir, '18_monitoreo_en_vivo.png') });
+            console.log("   -> Captura 18 guardada (Monitoreo en Vivo con estudiante activo).");
+            await adminCtx.close();
+            console.log("   -> Contexto admin cerrado, continuando test de estudiante...");
+
             console.log("11.2. Simulando modo sin conexión (Offline)...");
             await page.evaluate(() => {
                 window.dispatchEvent(new Event('offline'));
@@ -243,16 +266,143 @@ async function main() {
         await page.screenshot({ path: path.join(artDir, '12_subtest_completado.png') });
         console.log("   -> Captura 12 guardada (Prueba Completada).");
 
+        // ==========================================
+        // ADMIN POST-TEST SCREENSHOTS
+        // ==========================================
+        console.log("\n==================================================");
+        console.log("  CAPTURAS ADMIN: RESULTADOS + MONITOREO + VISTAS");
+        console.log("==================================================");
+
+        // Logout student
+        console.log("15. Cerrando sesión de Estudiante...");
+        const studentCookies = await page.cookies();
+        for (const cookie of studentCookies) {
+            await page.deleteCookie(cookie);
+        }
+
+        // Login as admin again
+        console.log("16. Iniciando sesión como Administrador (post-test)...");
+        await page.goto('http://localhost:8080/login', { waitUntil: 'networkidle2' });
+        await page.type('input[name="username"]', 'admin');
+        await page.type('input[name="password"]', 'admin123');
+        await Promise.all([
+            page.click('button[type="submit"]'),
+            page.waitForNavigation({ waitUntil: 'networkidle2' })
+        ]);
+
+        // Screenshot: Admin Panel (de-vibecoded reactivos)
+        console.log("17. Capturando Panel Admin (de-vibecoded)...");
+        await page.goto('http://localhost:8080/admin/reactivos', { waitUntil: 'networkidle2' });
+        await page.screenshot({ path: path.join(artDir, '15_admin_reactivos_premium.png') });
+        console.log("   -> Captura 15 guardada (Panel Reactivos Premium).");
+
+        // Screenshot: Admin Versiones (de-vibecoded)
+        console.log("18. Capturando Admin Versiones (de-vibecoded)...");
+        await page.goto('http://localhost:8080/admin/versiones', { waitUntil: 'networkidle2' });
+        await page.screenshot({ path: path.join(artDir, '16_admin_versiones_premium.png') });
+        console.log("   -> Captura 16 guardada (Versiones Premium).");
+
+        // Screenshot: Resultados Historial tab
+        console.log("19. Capturando Historial de Resultados...");
+        await page.goto('http://localhost:8080/resultados', { waitUntil: 'networkidle2' });
+        await page.screenshot({ path: path.join(artDir, '17_resultados_historial.png') });
+        console.log("   -> Captura 17 guardada (Historial de Evaluaciones).");
+
+        // Scrape real CIF and período from the first row of the historial table
+        const firstRow = await page.evaluate(() => {
+            const row = document.querySelector('#tab-historial tbody tr');
+            if (!row) return null;
+            const cells = row.querySelectorAll('td');
+            return { cif: cells[0]?.textContent?.trim(), periodo: cells[1]?.textContent?.trim() };
+        });
+        const realCif = firstRow?.cif || 'DEV0000001';
+        const realPeriodo = firstRow?.periodo || '2026-I';
+        console.log(`   -> CIF detectado: ${realCif}, Período: ${realPeriodo}`);
+        // (Monitoreo en Vivo captura 18 ya se tomó durante el test activo del estudiante)
+
+        // Screenshot: Reporte Psicométrico (results detail)
+        console.log("21. Capturando Reporte Psicométrico...");
+        await page.goto(`http://localhost:8080/resultados/${realCif}/${realPeriodo}`, { waitUntil: 'networkidle2' });
+        await page.screenshot({ path: path.join(artDir, '19_reporte_psicometrico.png') });
+        console.log("   -> Captura 19 guardada (Reporte Psicométrico).");
+
+        // Screenshot: Detalle de Respuestas
+        console.log("22. Capturando Detalle de Respuestas...");
+        await page.goto(`http://localhost:8080/resultados/${realCif}/${realPeriodo}/respuestas`, { waitUntil: 'networkidle2' });
+        await page.screenshot({ path: path.join(artDir, '20_detalle_respuestas.png') });
+        console.log("   -> Captura 20 guardada (Detalle de Respuestas).");
+
+        // ==========================================
+        // EVALUADOR-SPECIFIC LOGIN & VIEWS
+        // ==========================================
+        console.log("\n==================================================");
+        console.log("  CAPTURAS EVALUADOR: LOGIN PROPIO + LANDING PAGE ");
+        console.log("==================================================");
+
+        // Logout admin
+        console.log("23. Cerrando sesión de Admin...");
+        const adminPostCookies = await page.cookies();
+        for (const cookie of adminPostCookies) {
+            await page.deleteCookie(cookie);
+        }
+
+        // Login as evaluador
+        console.log("24. Iniciando sesión como Evaluador...");
+        await page.goto('http://localhost:8080/login', { waitUntil: 'networkidle2' });
+        await page.type('input[name="username"]', 'evaluador');
+        await page.type('input[name="password"]', 'evaluador123');
+        await Promise.all([
+            page.click('button[type="submit"]'),
+            page.waitForNavigation({ waitUntil: 'networkidle2' })
+        ]);
+        // Role-based handler should redirect to /resultados
+        await page.screenshot({ path: path.join(artDir, '21_evaluador_landing.png') });
+        console.log("   -> Captura 21 guardada (Landing Evaluador → /resultados).");
+
+        // Screenshot: Evaluador Monitoreo en Vivo tab
+        console.log("25. Evaluador: Monitoreo en Vivo...");
+        const evalMonitoreoBtn = await page.$('#btn-monitoreo');
+        if (evalMonitoreoBtn) {
+            await evalMonitoreoBtn.click();
+            await new Promise(r => setTimeout(r, 300));
+        }
+        await page.screenshot({ path: path.join(artDir, '22_evaluador_monitoreo.png') });
+        console.log("   -> Captura 22 guardada (Evaluador - Monitoreo en Vivo).");
+
+        // Screenshot: Evaluador results detail
+        console.log("26. Evaluador: Reporte psicométrico...");
+        await page.goto(`http://localhost:8080/resultados/${realCif}/${realPeriodo}`, { waitUntil: 'networkidle2' });
+        await page.screenshot({ path: path.join(artDir, '23_evaluador_reporte.png') });
+        console.log("   -> Captura 23 guardada (Evaluador - Reporte Psicométrico).");
+
+        // Screenshot: Evaluador respuestas detail
+        console.log("27. Evaluador: Detalle de Respuestas...");
+        await page.goto(`http://localhost:8080/resultados/${realCif}/${realPeriodo}/respuestas`, { waitUntil: 'networkidle2' });
+        await page.screenshot({ path: path.join(artDir, '24_evaluador_respuestas.png') });
+        console.log("   -> Captura 24 guardada (Evaluador - Detalle de Respuestas).");
+
+        // Screenshot: RBAC check — evaluador cannot access admin pages
+        console.log("28. Verificando RBAC: Evaluador no puede acceder a /admin/...");
+        const evalAdminResponse = await page.goto('http://localhost:8080/admin/reactivos', { waitUntil: 'networkidle2' });
+        const evalAdminStatus = evalAdminResponse.status();
+        if (evalAdminStatus === 403) {
+            console.log("   [✓] CHECK PASADO: Evaluador recibió HTTP 403 Forbidden en zona admin.");
+        } else {
+            console.error(`   [X] CHECK FALLADO: Evaluador pudo acceder (HTTP ${evalAdminStatus}).`);
+        }
+        await page.screenshot({ path: path.join(artDir, '25_evaluador_rbac_denied.png') });
+        console.log("   -> Captura 25 guardada (Evaluador - RBAC Denied).");
+
         console.log("==================================================");
 
     } catch (e) {
         console.error("Error durante la automatización: ", e);
     } finally {
         await browser.close();
-        console.log("15. Deteniendo servidor Spring Boot...");
+        console.log("29. Deteniendo servidor Spring Boot...");
         server.kill();
         
-        console.log("16. Deteniendo base de datos PostgreSQL...");
+        console.log("30. Deteniendo base de datos PostgreSQL...");
         const stop = spawn('C:\\Users\\devuser\\pgsql\\bin\\pg_ctl.exe', [
             '-D', 'C:\\Users\\devuser\\pgsql\\data',
             'stop'
